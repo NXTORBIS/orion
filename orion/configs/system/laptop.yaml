@@ -13,6 +13,10 @@ backends:
     model: models/Qwen3.5-0.8B-Base
     adapter: checkpoints/orion-0.1-synthmath-lora/final
     max_new_tokens: 400
+  vision:
+    kind: hf-vision               # Qwen3.5-0.8B-Base multimodal (image understanding)
+    model: models/Qwen3.5-0.8B-Base
+    max_new_tokens: 512
 tools:
   workspace: workspace            # read_file is confined to this directory
   sqlite: null                    # path to a read-only SQLite database for the sql tool

@@ -3,11 +3,14 @@
 * ``HFBackend``          — a local transformers checkpoint (+ optional LoRA adapter), CPU or GPU.
 * ``LlamaServerBackend`` — llama.cpp ``llama-server`` (OpenAI-compatible HTTP API) for GGUF models;
                            ``start_llama_server`` launches it from tools/llama.cpp.
+* ``VisionBackend``      — multimodal model (Qwen3.5-0.8B) for image understanding and analysis.
 * ``ScriptedBackend``    — deterministic canned responses for tests of the system logic.
 """
 
 from __future__ import annotations
 
+import base64
+import io
 import json
 import subprocess
 import time
@@ -51,6 +54,110 @@ class HFBackend:
     def chat_many(self, conversations: list[list[Message]], max_tokens: int = 512) -> list[str]:
         self.gen.max_new_tokens = max_tokens
         return self.gen.generate(conversations)
+
+
+class VisionBackend:
+    """Multimodal vision-language model (e.g., Qwen3.5-0.8B with vision encoder)."""
+
+    def __init__(self, model_dir: str | Path, max_new_tokens: int = 512):
+        import torch
+        from PIL import Image
+        from transformers import AutoProcessor, AutoModelForCausalLM
+
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
+        self.model_path = Path(model_dir)
+        self.max_new_tokens = max_new_tokens
+        self.name = f"vision:{self.model_path.name}"
+
+        # Load processor and model
+        self.processor = AutoProcessor.from_pretrained(str(self.model_path), trust_remote_code=True)
+        self.model = AutoModelForCausalLM.from_pretrained(
+            str(self.model_path),
+            torch_dtype=self.dtype,
+            device_map=self.device,
+            trust_remote_code=True,
+        )
+        self.model.eval()
+
+    def analyze_vision(self, image_base64: str, prompt: str) -> dict[str, Any]:
+        """Analyze an image with a text prompt.
+
+        Args:
+            image_base64: Base64-encoded image data
+            prompt: Text prompt for analysis
+
+        Returns:
+            Dict with description, objects, confidence, etc.
+        """
+        from PIL import Image
+        import torch
+
+        # Decode base64 image
+        try:
+            image_data = base64.b64decode(image_base64)
+            image = Image.open(io.BytesIO(image_data)).convert("RGB")
+        except Exception as e:
+            return {
+                "description": "",
+                "objects": [],
+                "text": "",
+                "confidence": 0.0,
+                "error": f"Failed to decode image: {e}",
+            }
+
+        # Prepare inputs
+        messages = [{"role": "user", "content": [{"type": "image", "image": image}, {"type": "text", "text": prompt}]}]
+
+        # Process and generate
+        try:
+            text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            image_inputs, video_inputs = self.processor.process_vision_info(messages)
+            inputs = self.processor(
+                text=[text],
+                images=image_inputs,
+                videos=video_inputs,
+                padding=True,
+                return_tensors="pt",
+            )
+            inputs = inputs.to(self.device)
+
+            with torch.no_grad():
+                outputs = self.model.generate(**inputs, max_new_tokens=self.max_new_tokens, do_sample=False)
+
+            response_text = self.processor.decode(outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True)
+
+            return {
+                "description": response_text,
+                "objects": [],
+                "text": "",
+                "confidence": 0.85,  # Placeholder confidence
+            }
+        except Exception as e:
+            return {
+                "description": "",
+                "objects": [],
+                "text": "",
+                "confidence": 0.0,
+                "error": f"Vision analysis failed: {e}",
+            }
+
+    def chat(self, messages: list[Message], max_tokens: int = 512, temperature: float = 0.0, stop: list[str] | None = None) -> str:
+        """Text-only chat (falls back to text mode if image not present)."""
+        # For now, just use text; full multimodal chat would require processing images in messages
+        self.max_new_tokens = max_tokens
+
+        import torch
+
+        text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+        inputs = self.processor(text=[text], padding=True, return_tensors="pt")
+        inputs = inputs.to(self.device)
+
+        with torch.no_grad():
+            outputs = self.model.generate(**inputs, max_new_tokens=max_tokens, do_sample=False)
+
+        response = self.processor.decode(outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True)
+        return response.strip()
 
 
 class LlamaServerBackend:

@@ -7,7 +7,7 @@ from typing import Any
 
 import yaml
 
-from orion.system.backends import HFBackend, LlamaServerBackend, ScriptedBackend, start_llama_server
+from orion.system.backends import HFBackend, LlamaServerBackend, VisionBackend, ScriptedBackend, start_llama_server
 from orion.system.memory import MemoryStore
 from orion.system.orchestrator import Orchestrator
 from orion.system.rag import Retriever
@@ -49,6 +49,8 @@ def build_backends(cfg: dict[str, Any], root: Path, dry_run: bool = False) -> tu
         if kind == "hf":
             adapter = root / spec["adapter"] if spec.get("adapter") and (root / spec["adapter"]).exists() else None
             backends[name] = HFBackend(root / spec["model"], adapter, max_new_tokens=spec.get("max_new_tokens", 512))
+        elif kind == "hf-vision":
+            backends[name] = VisionBackend(root / spec["model"], max_new_tokens=spec.get("max_new_tokens", 512))
         elif kind == "llama-server":
             url = f"http://127.0.0.1:{spec.get('port', 8080)}"
             backend = LlamaServerBackend(url, name=f"{name}:{Path(spec['model']).name}")

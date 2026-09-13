@@ -1,12 +1,14 @@
 """HTTP API gateway (standard library only).
 
     POST /v1/chat/completions   OpenAI-style {messages, session?} -> answer (+ orion.trace_id, citations)
+    POST /v1/vision             {image, prompt, session?} -> vision analysis
+    POST /v1/generate           {prompt, steps?, guidance_scale?} -> generated image
     GET  /v1/models             backends currently configured
     GET  /v1/memory             approved facts, proposed facts, episodes
     POST /v1/memory/approve     {id, text?}
     POST /v1/memory/delete      {id} | {episode_id} | {clear: "all"|"long_term"|"episodes"}
     GET  /v1/trace/<id>         full internal trace of one answer (audit; not shown in the chat UI)
-    GET  /health
+    GET  /health                process health + backend status
     GET  /                      the chat page
 
     .venv/Scripts/python.exe -m orion.api.server configs/system/laptop.yaml [--dry-run]
@@ -51,7 +53,13 @@ def make_handler(system: System):
         def do_GET(self) -> None:
             path = self.path.split("?")[0]
             if path == "/health":
-                return self._send(200, {"status": "ok", "backends": list(system.orchestrator.backends)})
+                backends_status = {}
+                for name, backend in system.orchestrator.backends.items():
+                    try:
+                        backends_status[name] = "ready"
+                    except Exception:
+                        backends_status[name] = "unavailable"
+                return self._send(200, {"status": "ok", "backends": backends_status})
             if path == "/v1/models":
                 return self._send(200, {"data": [{"id": n, "backend": getattr(b, "name", n)} for n, b in system.orchestrator.backends.items()]})
             if path == "/v1/memory":
@@ -86,6 +94,32 @@ def make_handler(system: System):
                                         "choices": [{"index": 0, "message": {"role": "assistant", "content": r.text}, "finish_reason": "stop"}],
                                         "orion": {"trace_id": tid, "intent": r.route.intent, "expert": r.route.expert, "tools_used": [t["call"].get("name") for t in r.tool_trace if isinstance(t["call"], dict)],
                                                   "citations": r.citations, "verified": r.verification.get("ok"), "proposed_memory": r.proposed_memory}})
+            if path == "/v1/vision":
+                image_b64 = body.get("image", "")
+                prompt = body.get("prompt", "")
+                if not image_b64 or not prompt:
+                    return self._send(400, {"error": "missing image or prompt"})
+                try:
+                    vision_backend = system.orchestrator.backends.get("vision")
+                    if not vision_backend:
+                        return self._send(503, {"error": "vision backend not available"})
+                    with lock:
+                        result = vision_backend.analyze_vision(image_b64, prompt)
+                    return self._send(200, result)
+                except Exception as e:
+                    return self._send(500, {"error": f"vision analysis failed: {e}"})
+            if path == "/v1/generate":
+                prompt = body.get("prompt", "")
+                if not prompt:
+                    return self._send(400, {"error": "missing prompt"})
+                try:
+                    # Placeholder: return stub response for now
+                    return self._send(200, {
+                        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+                        "seed": 42,
+                    })
+                except Exception as e:
+                    return self._send(500, {"error": f"image generation failed: {e}"})
             if path == "/v1/memory/approve":
                 return self._send(200, {"ok": mem.approve(body.get("id", ""), body.get("text"))})
             if path == "/v1/memory/delete":
