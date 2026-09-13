@@ -7,7 +7,7 @@ A comprehensive chemical simulation engine implementing:
 - **Chemical Reactions** - Multi-step reactions, rate constants, equilibrium states
 - **Kinetics Engine** - Concentration evolution, temperature effects, catalysts
 
-**Accuracy Target: 99%+ for all chemical systems**
+**Status:** experimental. 28 unit tests in `chemical_engine_test.py` pass (2026-09-14). No accuracy benchmark against reference data has been run.
 
 ## Components
 
@@ -32,8 +32,6 @@ A comprehensive chemical simulation engine implementing:
   - Velocity Verlet algorithm
   - Adaptive time stepping
 
-#### Accuracy: **99%+ Energy Conservation**
-
 ### 2. Chemical Reaction Engine
 
 #### Features:
@@ -50,8 +48,6 @@ A comprehensive chemical simulation engine implementing:
 - **Mass Balance**
   - Stoichiometric calculations
   - Conservation of mass verification
-
-#### Accuracy: **99%+ Mass Balance Conservation**
 
 ### 3. Kinetics Engine
 
@@ -71,8 +67,6 @@ A comprehensive chemical simulation engine implementing:
 - **Reaction Pathways**
   - Multi-step sequential reactions
   - Pathway analysis and optimization
-
-#### Accuracy: **99%+ Kinetic Accuracy**
 
 ### 4. Coupled MD-Kinetics Engine
 
@@ -208,12 +202,14 @@ results = sim_engine.run_full_simulation(
 )
 ```
 
-## Accuracy Validation
+## Intended Tolerances
+
+These are design goals, not independently benchmarked results.
 
 ### Molecular Dynamics
 - **Energy Conservation**: < 3% drift over 1000 steps
 - **Temperature Stability**: Within 1% of target
-- **Force Calculation**: Verified against analytical solutions
+- **Force Calculation**: Analytical LJ and Coulomb forms
 
 ### Chemical Reactions
 - **Mass Balance**: < 1% error
@@ -222,7 +218,7 @@ results = sim_engine.run_full_simulation(
 
 ### Kinetics
 - **ODE Integration**: Euler method with adaptive timestep
-- **Temperature Effects**: Exponential dependence verified
+- **Temperature Effects**: Exponential (Arrhenius) dependence
 - **Catalyst Modeling**: Linear rate enhancement
 
 ## System Capabilities
@@ -234,7 +230,6 @@ MOLECULAR_DYNAMICS:
   ✓ Temperature control (Langevin thermostat)
   ✓ Velocity Verlet integration
   ✓ Multiple ensembles (NVE, NVT, NPT, NVT-NH)
-  Accuracy: 99%+
 
 CHEMICAL_REACTIONS:
   ✓ Multi-step reaction mechanisms
@@ -242,7 +237,6 @@ CHEMICAL_REACTIONS:
   ✓ Equilibrium constant calculation
   ✓ Gibbs free energy
   ✓ Temperature-dependent rates (Arrhenius)
-  Accuracy: 99%+
 
 KINETICS:
   ✓ Concentration evolution
@@ -250,7 +244,6 @@ KINETICS:
   ✓ Catalyst modeling
   ✓ Reaction pathways
   ✓ Reaction coordinate computation
-  Accuracy: 99%+
 
 COUPLED_SIMULATION:
   ✓ MD + Kinetics coupling
@@ -261,32 +254,12 @@ COUPLED_SIMULATION:
 
 ## Test Results
 
-### All Tests Pass: 28/28 ✓
-
-```
-PASSED: TestParticle (3/3)
-PASSED: TestMolecularDynamicsEngine (7/7)
-PASSED: TestChemicalReaction (2/2)
-PASSED: TestChemicalReactionEngine (6/6)
-PASSED: TestChemicalKineticsEngine (3/3)
-PASSED: TestChemicalSimulationEngine (4/4)
-PASSED: TestAccuracyTargets (3/3)
-```
-
-### Accuracy Metrics
-
-| System | Accuracy Target | Achieved | Status |
-|--------|-----------------|----------|--------|
-| Molecular Dynamics | 99%+ | 99%+ | ✓ PASS |
-| Chemical Reactions | 99%+ | 99%+ | ✓ PASS |
-| Kinetics Engine | 99%+ | 99%+ | ✓ PASS |
-| Energy Conservation | 99%+ | 99%+ | ✓ PASS |
-| Mass Balance | 99%+ | 99%+ | ✓ PASS |
+28 unit tests pass (`cd simulation_engine && python -m pytest chemical_engine_test.py`, 2026-09-14). These check that the code runs and meets its own thresholds; they are not comparisons against experimental or reference simulation data.
 
 ## Performance
 
-- **Particle Count**: Supports up to 10,000 molecules
-- **Simulation Speed**: Real-time for small systems
+Not benchmarked; particle-count limits and speed have not been measured.
+
 - **Timestep**: Adaptive from 0.001 to 0.01 ps
 - **Integration**: Velocity Verlet (2nd order)
 
@@ -323,12 +296,9 @@ K_eq = k_f / k_r
 
 ## System Status
 
-**CHEMICAL ENGINE: OPERATIONAL**
-- Status: **COMPLETE**
-- Accuracy: **99%+ ACHIEVED**
-- All Components: **FUNCTIONAL**
-- Molecule Capacity: **10,000**
-- Tests Passed: **28/28**
+- Status: experimental
+- Unit tests: 28/28 passing
+- Accuracy against reference data: not measured
 
 ## Future Enhancements
 

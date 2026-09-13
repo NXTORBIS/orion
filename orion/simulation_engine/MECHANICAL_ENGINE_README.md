@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Mechanical Simulation Engine is a comprehensive physics-based simulation system for modeling machine dynamics, engineering systems, and mechanical design optimization. Part of the ORION 13-domain superintelligence ecosystem, it provides production-grade mechanical and engineering simulations with 99%+ accuracy.
+The Mechanical Simulation Engine is a comprehensive physics-based simulation system for modeling machine dynamics, engineering systems, and mechanical design optimization. It is experimental: its 48 unit tests pass, but its physical accuracy has not been benchmarked against reference data.
 
 **Key Features:**
 - Real-time rigid body dynamics
@@ -298,7 +298,6 @@ print(f"Rise: {thermal.temperature - 293.15:.1f} K")
 - Rotational dynamics (τ = Iα)
 - Velocity Verlet integration
 - Damping and energy dissipation
-- **Accuracy: 99%+**
 
 #### Gear Mechanics
 - Involute gear geometry
@@ -306,60 +305,40 @@ print(f"Rise: {thermal.temperature - 293.15:.1f} K")
 - Contact stress (simplified Hertzian)
 - Friction losses
 - Power efficiency
-- **Accuracy: 99%+**
 
 #### Linkage Kinematics
 - Constraint force application
 - Joint reactions
 - Closed-loop mechanism solving
-- **Accuracy: 99%+**
 
 #### Control Systems
 - PID feedback control
 - Anti-windup saturation
 - Integral action tracking
 - Derivative term filtering
-- **Accuracy: 99%+**
 
 #### Vibration Analysis
 - FFT frequency detection
 - Damping ratio calculation
 - Natural frequency determination
-- **Accuracy: 99%+**
 
 #### Stress Analysis
 - Uniaxial stress calculation
 - Linear elastic stress-strain
 - Safety factor determination
 - Failure prediction
-- **Accuracy: 99%+**
 
 #### Thermal Management
 - Heat capacity and conduction
 - Convection cooling
 - Temperature evolution
 - Steady-state analysis
-- **Accuracy: 99%+**
 
 ---
 
-## Performance Specifications
+## Performance
 
-### Simulation Speed
-- Simple systems: 1000+ Hz
-- Complex systems: 100+ Hz
-- Real-time capable for interactive applications
-
-### Scalability
-- Bodies: Up to 1,000+
-- Gears: Up to 100+
-- Mechanisms: Multiple complex systems
-- Memory: < 100 MB for typical systems
-
-### Numerical Stability
-- Energy conservation: >99%
-- Constraint satisfaction: >99%
-- Stress accuracy: >99%
+Not benchmarked. No speed, scalability, memory, or conservation measurements have been recorded.
 
 ---
 
@@ -404,7 +383,7 @@ Damping: ζ = ln(decay_rate) / ln(time_constant)
 ```
 simulation_engine/
 ├── mechanical_engine.py          # Core implementation (1200+ lines)
-├── mechanical_engine_test.py     # Test suite (40+ tests)
+├── mechanical_engine_test.py     # Test suite (48 tests)
 ├── mechanical_examples.py         # 7 working examples
 └── MECHANICAL_ENGINE_README.md   # This documentation
 ```
@@ -434,21 +413,7 @@ passed, failed = run_all_tests()
 - Engine integration: 13 tests
 - Accuracy validation: 3 tests
 
-**Total: 48 comprehensive tests**
-
----
-
-## Integration with ORION Domains
-
-The Mechanical Engine integrates seamlessly with:
-
-1. **Math Domain (99%)** - Numerical methods, linear algebra
-2. **Science Domain (99%)** - Physics principles, engineering theory
-3. **Systems Domain (99%)** - Complex adaptive systems
-4. **Code Domain (95%)** - Efficient algorithms
-5. **3D Modeling (99%)** - Visualization and geometry
-6. **Optimization Domain** - Design space exploration
-7. **Simulation Domain** - Multi-physics coupling
+**Total: 48 tests, all passing** (`cd simulation_engine && python -m pytest mechanical_engine_test.py`, 2026-09-14). They check that components run and meet their own thresholds, not physical accuracy against reference data.
 
 ---
 
@@ -471,21 +436,6 @@ from mechanical_engine import MechanicalEngine
 engine = MechanicalEngine()
 print("Mechanical Engine Ready")
 ```
-
----
-
-## Accuracy Guarantees
-
-| Component | Metric | Target | Achieved |
-|-----------|--------|--------|----------|
-| Dynamics | Energy Conservation | 99%+ | ✓ PASS |
-| Gears | Efficiency Accuracy | 99%+ | ✓ PASS |
-| Kinematics | Constraint Satisfaction | 99%+ | ✓ PASS |
-| Control | Setpoint Tracking | 99%+ | ✓ PASS |
-| Vibration | Frequency Detection | 99%+ | ✓ PASS |
-| Stress | Safety Factor | 99%+ | ✓ PASS |
-| Thermal | Temperature Prediction | 99%+ | ✓ PASS |
-| **Overall** | **System Accuracy** | **99%+** | **✓ ACHIEVED** |
 
 ---
 
@@ -536,9 +486,9 @@ Potential extensions:
 ## License and Attribution
 
 ORION Mechanical Simulation Engine  
-Part of ORION 13-Domain Superintelligence  
+Part of ORION  
 Date: September 14, 2026  
-Status: Production Ready - 99%+ Accuracy
+Status: Experimental; unit tests pass, physical accuracy not benchmarked
 
 Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
 

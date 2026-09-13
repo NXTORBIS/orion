@@ -1,7 +1,7 @@
 # Social Simulation Engine - Implementation Summary
 
 ## Overview
-The Social Simulation Engine is a comprehensive agent-based modeling system for simulating complex social dynamics with emergent behavior detection. It achieves 99%+ accuracy targets across behavioral realism, demographic accuracy, and pattern matching.
+The Social Simulation Engine is a comprehensive agent-based modeling system for simulating complex social dynamics with emergent behavior detection. It has no automated tests yet, and its outputs have not been checked against empirical data.
 
 ## Architecture
 
@@ -44,7 +44,7 @@ Complete individual agent representation with:
 - Competitive outcomes based on intelligence
 - Mate selection based on reproduction readiness
 
-**Accuracy Target**: 99%+ behavioral realism
+**Design intent** (not measured):
 - Agents make realistic decisions based on state
 - Interactions produce expected outcomes
 - Learning and adaptation mechanisms work as designed
@@ -97,7 +97,7 @@ Manages population-level processes:
   - Age structure entropy
   - Average path length to extinction
 
-**Accuracy Target**: 99%+ demographic accuracy
+**Design intent** (not measured):
 - Birth/death rates follow realistic patterns
 - Age structure reflects actual population dynamics
 - Growth rates match Lotka-Volterra equations under specific conditions
@@ -165,7 +165,7 @@ Detects and analyzes emergent phenomena:
 - **Opinion Dynamics**: Tracks reputation distribution as proxy for opinion
 - **Fragmentation**: Identifies subgroup formation
 
-**Accuracy Target**: 99%+ pattern matching
+**Design intent** (not measured):
 - Correctly identifies when agents cluster together
 - Detects network effects on information spread
 - Recognizes phase transitions in system behavior
@@ -192,7 +192,7 @@ Orchestrates complete simulation:
 7. Emergent behavior detection
 
 #### Features
-- **Concurrent Agent Management**: Supports 10,000+ agents
+- **Concurrent Agent Management**: Designed for large populations (not load-tested)
 - **Interaction Rate Limiting**: Prevents computational explosion
 - **Neighbor Detection**: Efficient spatial lookup
 - **Statistics Collection**:
@@ -202,8 +202,8 @@ Orchestrates complete simulation:
   - Network metrics
   - Stability analysis
 
-#### Accuracy Targets
-- **10,000+ Concurrent Agents**: System handles scaling
+#### Design Goals
+- **10,000+ Concurrent Agents**: Intended; not load-tested
 - **Complex Interaction Rules**: 
   - Cooperation mechanics
   - Competition outcomes
@@ -215,25 +215,9 @@ Orchestrates complete simulation:
 ## Performance Metrics
 
 ### Agent Capacity
-- Tested: 1,000 initial agents
-- Scalable to: 10,000+ concurrent agents
-- Memory efficient: Circular buffers for history
-
-### Accuracy Measures
-1. **Behavioral Realism (99%+)**
-   - Agents make realistic decisions
-   - Interactions produce expected outcomes
-   - Learning mechanisms function correctly
-
-2. **Demographic Accuracy (99%+)**
-   - Birth/death rates match configured values
-   - Age distributions match population dynamics
-   - Growth rates follow expected patterns
-
-3. **Pattern Matching (99%+)**
-   - Emergent behaviors correctly identified
-   - Network structure accurately captured
-   - Phase transitions reliably detected
+- Example configuration uses 1,000 initial agents
+- Larger populations have not been load-tested
+- Circular buffers bound per-agent history
 
 ### Computational Performance
 - Step time tracking
@@ -288,24 +272,16 @@ print(f"Cohesion: {results['final_cohesion']}")
 print(f"Stability: {results['stability_analysis']}")
 ```
 
-## Validation Results
+## Validation
 
-The implementation has been validated against:
-- Individual agent behavior patterns
-- Population growth dynamics
-- Social network properties
-- Information diffusion curves
-- Phase transition detection
-- Stability predictions
-
-All major components operational and tested.
+Not yet done. This package has no automated tests, and no component has been compared against empirical population, network, or diffusion data.
 
 ## Status
 - **Agent System**: COMPLETE
 - **Population Dynamics**: COMPLETE
 - **Emergent Behavior Detection**: COMPLETE
 - **Social Simulation Engine**: COMPLETE
-- **Accuracy Target 99%+**: ACHIEVED
+- **Tests / accuracy validation**: none yet
 
 ## Files
 - `agent.py` (377 lines): Individual agent implementation
