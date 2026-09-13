@@ -406,8 +406,7 @@ simulation_engine/
 ├── mechanical_engine.py          # Core implementation (1200+ lines)
 ├── mechanical_engine_test.py     # Test suite (40+ tests)
 ├── mechanical_examples.py         # 7 working examples
-├── MECHANICAL_ENGINE_README.md   # This documentation
-└── MECHANICAL_ENGINE_STATUS.md   # Implementation status
+└── MECHANICAL_ENGINE_README.md   # This documentation
 ```
 
 ---
