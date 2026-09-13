@@ -1,0 +1,51 @@
+{
+  "source_domain": "Math",
+  "source_performance": 0.99,
+  "extraction_method": "attention_pattern_analysis",
+  "extraction_targets": [
+    {
+      "knowledge_type": "Proof Construction",
+      "layer": "transformer_middle",
+      "extraction_technique": "gradient_flow_analysis",
+      "applies_to": [
+        "Code",
+        "Reasoning",
+        "Knowledge"
+      ]
+    },
+    {
+      "knowledge_type": "Symbolic Reasoning",
+      "layer": "encoder_output",
+      "extraction_technique": "attention_head_probing",
+      "applies_to": [
+        "Code",
+        "Sequences",
+        "Systems"
+      ]
+    },
+    {
+      "knowledge_type": "Optimization Patterns",
+      "layer": "ffn_layer",
+      "extraction_technique": "activation_pattern_matching",
+      "applies_to": [
+        "Science",
+        "Systems",
+        "Knowledge"
+      ]
+    },
+    {
+      "knowledge_type": "Pattern Recognition",
+      "layer": "embedding_layer",
+      "extraction_technique": "feature_space_analysis",
+      "applies_to": [
+        "Sequences",
+        "Code",
+        "3D Modeling"
+      ]
+    }
+  ],
+  "transfer_weight": 0.3,
+  "fine_tuning_strategy": "adapter_based",
+  "adapter_rank": 16,
+  "adapter_dropout": 0.1
+}
