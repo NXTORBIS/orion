@@ -1,0 +1,32 @@
+run_name: orion-math-breakthrough
+experiment: math-domain-optimization
+model: models/Qwen3.5-0.8B-Base
+device: cpu
+dtype: fp32
+gradient_checkpointing: false
+train_file: data/processed/synth_math_v1/sft_train.jsonl
+eval_file: data/processed/synth_math_v1/sft_validation.jsonl
+output_dir: checkpoints/orion-math-breakthrough
+max_train_examples: 2000
+seed: 42
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: all-linear
+
+hyperparameters:
+  max_length: 512
+  learning_rate: 0.0001
+  lr_scheduler: cosine
+  warmup_steps: 20
+  batch_size: 4
+  grad_accum: 2
+  epochs: 5
+  max_steps: -1
+  logging_steps: 10
+  save_steps: 50
+  eval_steps: 50
+
+report_to: []
