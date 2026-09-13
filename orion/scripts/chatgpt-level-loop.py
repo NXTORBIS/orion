@@ -77,7 +77,7 @@ def chatgpt_level_loop():
         print(f"Domains: Math, Science, Sequences, Systems, Coding, Reasoning, Knowledge, Instruction")
 
         if not run_cmd(
-            [sys.executable, "src/orion/train/sft.py",
+            [sys.executable, "-m", "orion.train.sft",
              f"configs/train/{config}"],
             f"Training {next_version} toward ChatGPT parity (~8-12 hours)"
         ):

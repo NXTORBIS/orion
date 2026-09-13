@@ -46,7 +46,7 @@ def omniscient_loop():
         next_version = f"ORION-{float(current_model.split('-')[1]) + 0.1:.1f}"
 
         if not run_cmd(
-            [sys.executable, "src/orion/train/sft.py",
+            [sys.executable, "-m", "orion.train.sft",
              "configs/train/orion-0.2-omniscient.yaml"],
             f"Training {next_version} on ALL 7 domains (18,700 examples)"
         ):
