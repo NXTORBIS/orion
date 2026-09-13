@@ -1,0 +1,35 @@
+# ChatGPT-Level ORION Training Configuration
+# Target: Reach 77%+ blended average across all 8 domains
+# This config works with the training script's expected format
+
+run_name: orion-chatgpt-level
+experiment: orion-chatgpt-level
+model: models/Qwen3.5-0.8B-Base
+device: cpu
+dtype: fp32
+gradient_checkpointing: false
+train_file: data/processed/chatgpt_level_combined/sft_train.jsonl
+eval_file: data/processed/chatgpt_level_combined/sft_validation.jsonl
+output_dir: checkpoints/orion-chatgpt-level
+seed: 42
+
+lora:
+  r: 32
+  alpha: 64
+  dropout: 0.05
+  target_modules: all-linear
+
+hyperparameters:
+  max_length: 1024
+  learning_rate: 1.0e-4
+  lr_scheduler: cosine
+  warmup_steps: 100
+  batch_size: 4
+  grad_accum: 2
+  epochs: 3
+  max_steps: 1000
+  logging_steps: 50
+  save_steps: 100
+  eval_steps: 100
+
+report_to: [mlflow]
