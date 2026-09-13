@@ -1,0 +1,27 @@
+{
+  "timestamp_utc": "2026-09-11T15:36:28+00:00",
+  "model_dir": "models\\Qwen3.5-0.8B-Base",
+  "transformers": "5.17.0",
+  "torch": "2.14.0+cpu",
+  "loaded_class": "Qwen3_5ForCausalLM",
+  "load_seconds": 4.8,
+  "params_by_block": {
+    "embed_tokens": 254.3,
+    "layers": 498.1,
+    "norm": 0.0
+  },
+  "params_total_M": 752.4,
+  "generate": {
+    "prompt": "The capital of France is",
+    "completion": " Paris. The capital of Belgium is Brussels. The capital of the Netherlands is Amsterdam. The capital of the United Kingdom is London. The capital of the United States",
+    "new_tokens": 32,
+    "tokens_per_s": 6.66
+  },
+  "train_step_512_tokens": {
+    "seconds": 21.05,
+    "tokens_per_s": 24.3,
+    "initial_loss_random_tokens": 14.485
+  },
+  "peak_rss_MB": 9982,
+  "warnings": []
+}

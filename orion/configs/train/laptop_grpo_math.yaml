@@ -1,0 +1,28 @@
+# RL with verifiable rewards on the laptop: a deliberately tiny run that proves the GRPO path
+# (rollouts via transformers.generate, verifier reward) — not a capability run.
+# Cost estimate: 4 generations × 160 tokens at ~7 tok/s ≈ 90 s per prompt; 4 prompts/step.
+run_name: orion-0.1-grpo-math-wiring
+experiment: orion-0.1
+model: models/Qwen3.5-0.8B-Base
+adapter: checkpoints/orion-0.1-synthmath-lora/final   # continue from the SFT policy (merged before fresh LoRA)
+device: cpu
+dtype: fp32
+train_file: data/processed/synth_math_v1/grpo_prompts.jsonl   # {"prompt": [...], "answer": "..."}
+output_dir: checkpoints/orion-0.1-grpo-math
+seed: 0
+use_vllm: false
+lora: {r: 16, alpha: 32, dropout: 0.0, target_modules: all-linear}
+hyperparameters:
+  learning_rate: 1.0e-5
+  batch_size: 4              # must be a multiple of num_generations
+  grad_accum: 1
+  num_generations: 4
+  max_completion_length: 160
+  max_prompt_length: 256
+  temperature: 1.0
+  beta: 0.0
+  loss_type: dapo
+  max_steps: 4
+  logging_steps: 1
+  save_steps: 4
+report_to: [mlflow]

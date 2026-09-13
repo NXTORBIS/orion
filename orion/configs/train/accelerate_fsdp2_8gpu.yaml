@@ -1,0 +1,22 @@
+# accelerate config: 8 GPUs, one node, PyTorch FSDP2 (full sharding), bf16.
+# Launch:  accelerate launch --config_file configs/train/accelerate_fsdp2_8gpu.yaml -m orion.train.sft configs/train/gpu_single_lora_sft.yaml
+compute_environment: LOCAL_MACHINE
+distributed_type: FSDP
+num_machines: 1
+num_processes: 8
+mixed_precision: bf16
+fsdp_config:
+  fsdp_version: 2
+  fsdp_reshard_after_forward: true          # ZeRO-3-style full sharding
+  fsdp_auto_wrap_policy: TRANSFORMER_BASED_WRAP
+  fsdp_transformer_layer_cls_to_wrap: Qwen3_5DecoderLayer
+  fsdp_state_dict_type: SHARDED_STATE_DICT
+  fsdp_offload_params: false
+  fsdp_activation_checkpointing: true
+  fsdp_cpu_ram_efficient_loading: true
+downcast_bf16: "no"
+machine_rank: 0
+main_training_function: main
+rdzv_backend: static
+same_network: true
+use_cpu: false

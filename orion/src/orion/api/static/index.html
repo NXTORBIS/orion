@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORION</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --text:#e6e6e6; --muted:#8a919e; --accent:#5b8def; --border:#2a2f3a; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; display:grid; grid-template-columns: 1fr 320px; height:100vh; }
+  main { display:flex; flex-direction:column; min-width:0; }
+  header { padding:12px 18px; border-bottom:1px solid var(--border); display:flex; gap:12px; align-items:center; }
+  header b { font-size:17px; letter-spacing:.06em; }
+  header span { color:var(--muted); font-size:13px; }
+  #log { flex:1; overflow:auto; padding:18px; display:flex; flex-direction:column; gap:12px; }
+  .msg { max-width:78%; padding:10px 14px; border-radius:12px; white-space:pre-wrap; word-break:break-word; }
+  .user { align-self:flex-end; background:#243352; }
+  .assistant { align-self:flex-start; background:var(--panel); border:1px solid var(--border); }
+  .meta { color:var(--muted); font-size:12px; margin-top:6px; }
+  form { display:flex; gap:8px; padding:12px 18px; border-top:1px solid var(--border); }
+  textarea { flex:1; resize:none; background:var(--panel); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:10px; font:inherit; height:64px; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:10px; padding:0 18px; font:inherit; cursor:pointer; }
+  button.secondary { background:#2a2f3a; }
+  aside { border-left:1px solid var(--border); background:var(--panel); padding:14px; overflow:auto; }
+  aside h3 { margin:6px 0 8px; font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  .fact { display:flex; gap:6px; align-items:flex-start; font-size:13px; padding:6px 0; border-bottom:1px solid var(--border); }
+  .fact span { flex:1; }
+  .fact button { padding:2px 8px; font-size:12px; }
+  .pill { display:inline-block; font-size:11px; padding:1px 7px; border-radius:999px; border:1px solid var(--border); color:var(--muted); margin-right:4px; }
+  @media (max-width: 800px) { body { grid-template-columns: 1fr; } aside { display:none; } }
+</style>
+</head>
+<body>
+<main>
+  <header><b>ORION</b><span id="status">connecting…</span></header>
+  <div id="log"></div>
+  <form id="f">
+    <textarea id="q" placeholder="Ask ORION… (Enter to send, Shift+Enter for a new line)"></textarea>
+    <button type="submit" id="send">Send</button>
+  </form>
+</main>
+<aside>
+  <h3>Memory (you control it)</h3>
+  <div id="pending"></div>
+  <div id="approved"></div>
+  <p><button class="secondary" onclick="clearMemory()">Clear all memory</button></p>
+  <h3>Last answer</h3>
+  <div id="lastmeta" class="meta">—</div>
+</aside>
+<script>
+const log = document.getElementById('log'), q = document.getElementById('q'), status = document.getElementById('status');
+const session = 'web-' + Math.random().toString(36).slice(2, 8);
+function add(role, text, meta) {
+  const d = document.createElement('div'); d.className = 'msg ' + role; d.textContent = text;
+  if (meta) { const m = document.createElement('div'); m.className = 'meta'; m.textContent = meta; d.appendChild(m); }
+  log.appendChild(d); log.scrollTop = log.scrollHeight; return d;
+}
+async function api(path, body) {
+  const r = await fetch(path, body ? {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)} : {});
+  return r.json();
+}
+async function refreshMemory() {
+  const m = await api('/v1/memory');
+  const pend = document.getElementById('pending'), appr = document.getElementById('approved');
+  pend.innerHTML = m.proposed.length ? '<div class="pill">proposed — approve to keep</div>' : '';
+  for (const f of m.proposed) {
+    const row = document.createElement('div'); row.className = 'fact';
+    row.innerHTML = `<span>${f.text}</span><button onclick="approve('${f.id}')">Keep</button><button class="secondary" onclick="del('${f.id}')">Discard</button>`;
+    pend.appendChild(row);
+  }
+  appr.innerHTML = m.approved.length ? '<div class="pill">approved</div>' : '<div class="meta">No approved facts stored.</div>';
+  for (const f of m.approved) {
+    const row = document.createElement('div'); row.className = 'fact';
+    row.innerHTML = `<span>${f.text}</span><button class="secondary" onclick="del('${f.id}')">Delete</button>`;
+    appr.appendChild(row);
+  }
+}
+async function approve(id) { await api('/v1/memory/approve', {id}); refreshMemory(); }
+async function del(id) { await api('/v1/memory/delete', {id}); refreshMemory(); }
+async function clearMemory() { await api('/v1/memory/delete', {clear: 'all'}); refreshMemory(); }
+document.getElementById('f').addEventListener('submit', async (e) => {
+  e.preventDefault(); const text = q.value.trim(); if (!text) return;
+  q.value = ''; add('user', text); const pending = add('assistant', '…'); document.getElementById('send').disabled = true;
+  try {
+    const r = await api('/v1/chat/completions', {messages: [{role: 'user', content: text}], session});
+    const o = r.orion || {};
+    pending.textContent = r.choices ? r.choices[0].message.content : ('error: ' + JSON.stringify(r));
+    const bits = [`intent ${o.intent}`, `expert ${o.expert}`];
+    if (o.tools_used && o.tools_used.length) bits.push('tools ' + o.tools_used.join(', '));
+    if (o.citations && o.citations.length) bits.push('sources ' + o.citations.map(c => '[' + c.n + '] ' + c.doc_id).join(' '));
+    if (o.verified !== undefined && o.verified !== null) bits.push('verified ' + o.verified);
+    document.getElementById('lastmeta').textContent = bits.join(' · ') + (o.trace_id ? ' · trace ' + o.trace_id : '');
+  } catch (err) { pending.textContent = 'request failed: ' + err; }
+  document.getElementById('send').disabled = false; refreshMemory();
+});
+q.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('f').requestSubmit(); } });
+api('/health').then(h => { status.textContent = 'backends: ' + h.backends.join(', '); refreshMemory(); }).catch(() => status.textContent = 'server unreachable');
+</script>
+</body>
+</html>

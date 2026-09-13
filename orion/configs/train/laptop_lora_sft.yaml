@@ -1,0 +1,32 @@
+# ORION-0.1 — Phase 6 real small-scale experiment on the laptop (CPU, fp32).
+# Measured budget: ~25 tokens/s forward+backward → ~90k tokens/hour (docs/03_hardware_report.md).
+run_name: orion-0.1-synthmath-lora
+experiment: orion-0.1
+model: models/Qwen3.5-0.8B-Base
+device: cpu
+dtype: fp32                       # bf16 is unusable on this CPU (measured)
+gradient_checkpointing: false     # 10 GB peak fits; checkpointing would cost ~30% time
+train_file: data/processed/synth_math_v1/sft_train.jsonl
+eval_file: data/processed/synth_math_v1/sft_validation.jsonl
+output_dir: checkpoints/orion-0.1-synthmath-lora
+seed: 0
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: all-linear      # attention (q/k/v/o), Gated DeltaNet projections and MLP; excludes lm_head
+
+hyperparameters:
+  max_length: 512
+  learning_rate: 2.0e-4
+  lr_scheduler: cosine
+  warmup_steps: 10
+  batch_size: 2
+  grad_accum: 4                   # effective batch 8 sequences
+  epochs: 1
+  max_steps: 120                  # ~120 × 8 × ~180 tokens ≈ 170k tokens ≈ 2 h on this laptop
+  logging_steps: 5
+  save_steps: 40
+  eval_steps: 40
+report_to: [mlflow]

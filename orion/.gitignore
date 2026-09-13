@@ -1,0 +1,18 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# large or generated artifacts — tracked by the registry, not git
+# (anchored: these names must only match the top-level artifact dirs, never source)
+/models/
+/data/
+/checkpoints/
+/runs/
+/mlruns/
+/mlartifacts/
+/hf_cache/
+/tools/
+*.safetensors
+*.gguf
+*.zip

@@ -1,0 +1,27 @@
+# ORION system layer — laptop profile.
+# Backends are OUR infrastructure: local weights via transformers or llama.cpp. No hosted APIs.
+backends:
+  general:
+    kind: llama-server            # Qwen3-14B Q4_K_M via tools/llama.cpp (3.2 tok/s measured)
+    model: models/Qwen3-14B-GGUF/Qwen3-14B-Q4_K_M.gguf
+    port: 8080
+    threads: 10
+    ctx: 8192
+    autostart: true
+  reasoning:
+    kind: hf                      # ORION-0.1 adapter on Qwen3.5-0.8B-Base once trained; used for math routing
+    model: models/Qwen3.5-0.8B-Base
+    adapter: checkpoints/orion-0.1-synthmath-lora/final
+    max_new_tokens: 400
+tools:
+  workspace: workspace            # read_file is confined to this directory
+  sqlite: null                    # path to a read-only SQLite database for the sql tool
+documents:
+  dir: workspace/docs             # *.txt / *.md indexed into the retriever at startup
+memory:
+  path: runs/memory/laptop.json
+server:
+  host: 127.0.0.1
+  port: 8765
+max_tool_steps: 6
+max_tokens: 768

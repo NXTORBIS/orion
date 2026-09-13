@@ -1,0 +1,23 @@
+# Wiring check only: 2 optimizer steps on 16 tiny examples. Proves the TRL/PEFT/MLflow path
+# and the run card before the multi-hour Phase 6 run. Never used as a model.
+run_name: smoke-lora-sft
+experiment: smoke
+model: models/Qwen3.5-0.8B-Base
+device: cpu
+dtype: fp32
+train_file: data/processed/smoke/sft_train.jsonl
+eval_file: data/processed/smoke/sft_validation.jsonl
+output_dir: checkpoints/smoke-lora-sft
+seed: 0
+lora: {r: 8, alpha: 16, dropout: 0.0, target_modules: all-linear}
+hyperparameters:
+  max_length: 256
+  learning_rate: 1.0e-4
+  warmup_steps: 0
+  batch_size: 2
+  grad_accum: 1
+  max_steps: 2
+  logging_steps: 1
+  save_steps: 2
+  eval_steps: 2
+report_to: [mlflow]

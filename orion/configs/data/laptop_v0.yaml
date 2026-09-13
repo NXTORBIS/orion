@@ -1,0 +1,44 @@
+# ORION data pipeline — laptop profile v0 for web/book text (no classifier weights downloaded yet).
+# Every stage is real; language, toxicity and quality use the documented heuristic methods
+# until the GlotLID / Granite-HAP / FineWeb-Edu weights are approved and present, at which
+# point the commented keys switch them to classifier mode. The run manifest records which.
+purpose: train
+registry: registry/licenses/datasets.yaml
+tokenizer: models/Qwen3.5-0.8B-Base       # for token counts in stats
+output_dir: data/processed/laptop_v0
+validation_fraction: 0.02
+
+sources:
+  # Register raw files here; each `source` must exist in registry/licenses/datasets.yaml.
+  # - {path: data/raw/comma/news.chunk.00.jsonl.gz, source: common-pile-comma, text_field: text}
+  []
+
+stages:
+  language:
+    enabled: true
+    # glotlid_model: models/glotlid/model_v3.bin
+    allowed: [eng, spa, fra, deu, por, ita, nld, rus, zho_Hani, jpn_Jpan, kor_Hang, und_Arab, und_Deva]
+  pii:
+    enabled: true
+    max_per_1k_words: 20
+  toxicity:
+    enabled: true
+    # classifier_model: models/granite-guardian-hap-38m
+    max_per_1k_words: 5
+  heuristics:
+    enabled: true
+    thresholds: {min_words: 50}
+  dedup:
+    enabled: true
+    near_threshold: 0.8
+  quality:
+    enabled: true
+    # edu_classifier_model: models/fineweb-edu-classifier
+    min_heuristic_score: 0.4
+  classify:
+    enabled: true
+  contamination:
+    enabled: true
+    index: data/index/eval_13gram.json
+    max_hits: 0
+    eval_files: []     # add every evaluation set here; the index is rebuilt when empty

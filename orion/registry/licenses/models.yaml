@@ -1,0 +1,370 @@
+# ORION model license registry (project brief §29).
+# One entry per model used, evaluated for use, or explicitly excluded.
+#
+# verified: "hf-api" = license tag / params / base availability checked on the Hugging Face
+#           API; "license-text" = LICENSE file read; "research" = cited web research only.
+# output_training: may this model's outputs be used to train another model?
+# status: selected | candidate | teacher-candidate | reference | excluded | eval-only
+# Nothing in this file is legal advice. legal_review must be "done" before commercial release.
+
+schema_version: 1
+last_reviewed: "2026-09-11"
+legal_review: pending
+
+provenance_advisories:
+  AA26-251A:
+    title: "China-Based Artificial Intelligence Companies Conducting Industrial-Scale Distillation Campaigns Against U.S. AI Companies"
+    issuers: [NSA, CISA, FBI]
+    date: "2026-09-08"
+    url: https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-251a
+    names: [DeepSeek, Moonshot AI, Alibaba, MiniMax, StepFun, Z.AI]
+    effect: "informational; no restriction on using open-weight models (text read 2026-09-11)"
+
+models:
+  # ---------------- selected for ORION-0.x (this laptop) ----------------
+  - id: qwen3.5-0.8b-base
+    repo: Qwen/Qwen3.5-0.8B-Base
+    org: Alibaba
+    params_b: 0.87
+    base_checkpoint: true
+    license: Apache-2.0
+    license_url: https://huggingface.co/Qwen/Qwen3.5-0.8B-Base/blob/main/LICENSE
+    verified: [hf-api]
+    commercial_use: true
+    output_training: allowed
+    derivatives: "any terms; keep LICENSE and NOTICE"
+    attribution: "retain Apache-2.0 notices"
+    restrictions: []
+    provenance_flags: [AA26-251A]
+    role: "Phase 6 training base (ORION-0.1)"
+    revision: dc7cdfe2ee4154fa7e30f5b51ca41bfa40174e68
+    downloaded: "2026-09-11"
+    local_path: models/Qwen3.5-0.8B-Base
+    architecture: "Qwen3_5ForConditionalGeneration: 24 text layers (18 Gated DeltaNet + 6 gated GQA attention, hidden 1024, FFN 3584), 12-layer vision encoder, vocab 248320, tied embeddings, 262K max positions; LICENSE file = Apache-2.0 verbatim"
+    status: selected
+
+  - id: qwen3.8-27b
+    repo: Qwen/Qwen3.8-27B
+    quantized_repo: unsloth/Qwen3.8-27B-GGUF
+    org: Alibaba
+    params_b: 27.78
+    base_checkpoint: false
+    license: Apache-2.0
+    license_url: https://huggingface.co/Qwen/Qwen3.8-27B/blob/main/LICENSE
+    verified: [hf-api]
+    commercial_use: true
+    output_training: allowed
+    derivatives: "any terms; keep LICENSE and NOTICE"
+    attribution: "retain Apache-2.0 notices; version card must state weights are Alibaba's"
+    restrictions: []
+    provenance_flags: [AA26-251A]
+    role: "local inference model under the system layer (ORION-0.5); post-training base (ORION-1.0)"
+    status: selected
+
+  - id: qwen3-14b-gguf
+    repo: Qwen/Qwen3-14B-GGUF
+    org: Alibaba
+    params_b: 14.77
+    base_checkpoint: false
+    license: Apache-2.0
+    verified: [hf-api]
+    commercial_use: true
+    output_training: allowed
+    revision: 530227a7d994db8eca5ab5ced2fb692b614357fd
+    downloaded: "2026-09-11"
+    local_path: models/Qwen3-14B-GGUF/Qwen3-14B-Q4_K_M.gguf
+    notes: "previous-generation (Apr 2025) dense 14B, user-selected; measured 3.19 tok/s generation / 8.58 tok/s prompt on this laptop (llama.cpp b10909, Q4_K_M)"
+    role: "local inference model for orchestration / judge experiments (ORION-0.5); unmodified Alibaba weights, never presented as ORION's own"
+    status: selected
+
+  # ---------------- candidates: foundations ----------------
+  - id: qwen3.5-2b-base
+    repo: Qwen/Qwen3.5-2B-Base
+    org: Alibaba
+    params_b: 2.27
+    base_checkpoint: true
+    license: Apache-2.0
+    verified: [hf-api]
+    commercial_use: true
+    output_training: allowed
+    provenance_flags: [AA26-251A]
+    role: "stretch laptop training base"
+    status: candidate
+
+  - id: qwen3.5-35b-a3b-base
+    repo: Qwen/Qwen3.5-35B-A3B-Base
+    org: Alibaba
+    params_b: 35.95
+    active_params_b: 3
+    base_checkpoint: true
+    license: Apache-2.0
+    verified: [hf-api]
+    commercial_use: true
+    output_training: allowed
+    provenance_flags: [AA26-251A]
+    role: "single-80GB-GPU post-training base"
+    status: candidate
+
+  - id: deepseek-v4-flash-base
+    repo: deepseek-ai/DeepSeek-V4-Flash-Base
+    org: DeepSeek
+    params_b: 292.02
+    active_params_b: 13
+    base_checkpoint: true
+    license: MIT
+    license_url: https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-Base/raw/main/LICENSE
+    verified: [hf-api, license-text]
+    commercial_use: true
+    output_training: allowed
+    derivatives: "any terms; keep copyright notice"
+    restrictions: []
+    notes: "FP8-only weights; CSA/HCA attention + mHC need custom training support"
+    provenance_flags: [AA26-251A]
+    role: "cluster continued-pretraining foundation (ORION-2.0)"
+    status: candidate
+
+  - id: k2-horizon-375b-a23b
+    repo: IFM/K2-Horizon-375B-A23B
+    org: IFM
+    params_b: 375
+    active_params_b: 23
+    base_checkpoint: "intermediate checkpoints on repo branches"
+    license: Apache-2.0
+    verified: [research]
+    commercial_use: true
+    output_training: allowed
+    training_data_open: "yes (some 375B artifacts pending)"
+    provenance_flags: []
+    role: "open-data alternative foundation / teacher"
+    status: candidate
+
+  - id: glm-5.3-flash
+    repo: zai-org/GLM-5.3-Flash
+    org: Z.ai
+    params_b: 321.32
+    active_params_b: 18
+    base_checkpoint: false
+    license: MIT
+    verified: [hf-api]
+    commercial_use: true
+    output_training: allowed
+    provenance_flags: [AA26-251A]
+    role: "primary generalist teacher; ORION-1.5 foundation (AA v4.3 42)"
+    status: teacher-candidate
+
+  # ---------------- teacher candidates with conditions ----------------
+  - id: deepseek-v4.1-flash
+    repo: deepseek-ai/DeepSeek-V4.1-Flash
+    org: DeepSeek
+    params_b: 763.21
+    base_checkpoint: false
+    license: MIT
+    verified: [hf-api]
+    commercial_use: true
+    output_training: "allowed (DeepSeek API ToS §4.2(3) also explicitly allows distillation)"
+    provenance_flags: [AA26-251A]
+    role: "math / coding teacher"
+    status: teacher-candidate
+
+  - id: glm-5.3
+    repo: zai-org/GLM-5.3
+    org: Z.ai
+    params_b: 753.33
+    base_checkpoint: false
+    license: "GLM-5.3 License (custom, MIT-style)"
+    verified: [hf-api, research]
+    commercial_use: true
+    output_training: "not restricted by license text (research)"
+    restrictions: ["MaaS providers with > $10B group revenue must pass Z.ai security review"]
+    provenance_flags: [AA26-251A]
+    role: "agentic teacher"
+    status: teacher-candidate
+
+  - id: kimi-k3
+    repo: moonshotai/Kimi-K3
+    org: Moonshot AI
+    params_b: 2779.93
+    base_checkpoint: false
+    license: "Kimi K3 License (custom)"
+    verified: [hf-api, research]
+    commercial_use: true
+    output_training: "not mentioned in license; Kimi API ToS §3.2(5) forbids building competing models -> self-host only"
+    restrictions:
+      - "MaaS business > $20M revenue in 12 months needs separate agreement"
+      - "display 'Kimi K3' above 100M MAU or $20M monthly revenue"
+    notes: "weights MXFP4 only (1.56 TB)"
+    provenance_flags: [AA26-251A]
+    role: "long-context / hardest-reasoning teacher (self-hosted)"
+    status: teacher-candidate
+
+  - id: qwen3.8-2.4t-a95b
+    repo: Qwen/Qwen3.8-2.4T-A95B
+    org: Alibaba
+    license: "Qwen3.8-Max License"
+    verified: [research]
+    commercial_use: true
+    output_training: "not mentioned"
+    restrictions:
+      - "MaaS / AI Work Assistant business > $50M revenue in 12 months needs separate license"
+      - "display model name above 100M MAU or $20M monthly revenue"
+    provenance_flags: [AA26-251A]
+    status: teacher-candidate
+
+  - id: minimax-m3
+    repo: MiniMaxAI/MiniMax-M3
+    org: MiniMax
+    license: "MiniMax Community License"
+    verified: [research]
+    commercial_use: "conditional"
+    output_training: "license silent; whether a distilled student is a derivative is unclear -> legal review"
+    restrictions:
+      - "commercial derivatives must display 'Built with MiniMax M3'"
+      - "one-time notice under $20M revenue; written authorization above"
+      - "AUP bans military use"
+    provenance_flags: [AA26-251A]
+    status: candidate
+
+  - id: nemotron-3-ultra
+    repo: nvidia/NVIDIA-Nemotron-3-Ultra-550B-A55B-BF16
+    org: NVIDIA
+    license: OpenMDW-1.1
+    verified: [research]
+    commercial_use: true
+    output_training: "allowed (license places no restriction on outputs)"
+    training_data_open: "major portions"
+    provenance_flags: []
+    role: "teacher from a lab not named in AA26-251A; open-data reference"
+    status: teacher-candidate
+
+  - id: gemma-4-31b
+    repo: google/gemma-4-31B
+    org: Google
+    params_b: 32.68
+    base_checkpoint: true
+    license: Apache-2.0
+    verified: [hf-api]
+    commercial_use: true
+    output_training: allowed
+    provenance_flags: []
+    status: teacher-candidate
+
+  - id: gpt-oss-120b
+    repo: openai/gpt-oss-120b
+    org: OpenAI
+    license: "Apache-2.0 + usage policy"
+    verified: [research]   # gpt-oss-20b verified on hf-api
+    commercial_use: true
+    output_training: allowed
+    notes: "MXFP4 weights; harmony chat format required"
+    provenance_flags: []
+    status: teacher-candidate
+
+  - id: muse-glimmer-30b
+    repo: meta-models/Muse-Glimmer-30B
+    org: Meta
+    params_b: 29.78
+    license: Apache-2.0
+    verified: [hf-api]
+    commercial_use: true
+    output_training: allowed
+    notes: "model card text adds age / trade-compliance language beyond the LICENSE file -> legal check; AA-Omniscience hallucination rate 82%"
+    provenance_flags: []
+    status: candidate
+
+  - id: mimo-v2.5-pro-base
+    repo: XiaomiMiMo/MiMo-V2.5-Pro-Base
+    org: Xiaomi
+    params_b: 1023.24
+    base_checkpoint: true
+    license: MIT
+    verified: [hf-api]
+    commercial_use: true
+    output_training: "allowed (license explicitly permits secondary training)"
+    provenance_flags: []
+    status: candidate
+
+  - id: olmo-3-32b
+    repo: allenai/Olmo-3-1125-32B
+    org: Ai2
+    params_b: 32.23
+    base_checkpoint: true
+    license: Apache-2.0
+    verified: [hf-api]
+    training_data_open: "yes (Dolma 3, Dolci)"
+    provenance_flags: []
+    role: "data-provenance and decontamination reference"
+    status: reference
+
+  # ---------------- excluded ----------------
+  - id: k2-horizon-0.9b
+    repo: IFM/K2-Horizon-0.9B
+    license: "card says apache-2.0 but license_name 'internal-only' (inconsistent)"
+    verified: [hf-api]
+    reason: "inconsistent license metadata; requires trust_remote_code"
+    status: excluded
+
+  - id: qwen3.8-flash-next
+    repo: Qwen/Qwen3.8-Flash-Next
+    license: "Qwen Community License 1.0"
+    verified: [research]
+    reason: "any MaaS or AI Work Assistant business needs a separate license — ORION is one"
+    status: excluded
+
+  - id: llama-4
+    repo: meta-llama/Llama-4-Maverick-17B-128E-Instruct
+    license: "Llama 4 Community License"
+    verified: [research]
+    reason: "models built with Llama materials or outputs must be named 'Llama...'; AUP; 700M MAU cap; EU multimodal carve-out"
+    status: excluded
+
+  - id: gemma-3-family
+    repo: google/gemma-3-27b-it
+    license: "Gemma Terms of Use"
+    verified: [research]
+    reason: "models trained on Gemma 3 outputs are 'Model Derivatives' bound by Google's terms"
+    status: excluded
+
+  - id: mistral-medium-3.5
+    repo: mistralai/Mistral-Medium-3.5-128B
+    license: "Modified MIT"
+    verified: [research]
+    reason: "no rights for companies > $20M monthly revenue, incl. derivatives"
+    status: excluded
+
+  - id: mistral-research-and-non-production
+    repo: "mistralai/Pixtral-Large-Instruct-2411, mistralai/Codestral-22B-v0.1"
+    license: "Mistral Research License / Mistral Non-Production License"
+    verified: [research]
+    reason: "non-commercial; research license also restricts outputs"
+    status: excluded
+
+  - id: minimax-m2.7
+    repo: MiniMaxAI/MiniMax-M2.7
+    license: "Modified MIT"
+    verified: [research]
+    reason: "commercial use prohibited without written authorization"
+    status: excluded
+
+  - id: community-uncensored-variants
+    repo: "any 'abliterated' / 'uncensored' / unofficial merged repo"
+    reason: "unknown training changes and provenance"
+    status: excluded
+
+  # ---------------- tools ----------------
+  - id: llama-cpp-b10909
+    source: https://github.com/ggml-org/llama.cpp/releases/tag/b10909
+    file: llama-b10909-bin-win-cpu-x64.zip
+    sha256: 4d4e3341d94f729d343a8e67e4ab692032645122c99368b88e02868212e639a8
+    license: MIT
+    local_path: tools/llama.cpp
+    role: "CPU inference engine for GGUF models (llama-bench, llama-server, llama-completion)"
+    status: selected
+
+  # ---------------- evaluation comparators only ----------------
+  - id: chatgpt
+    models: ["GPT-5.6 Luna (Free/Go)", "GPT-5.6 Sol (Plus)", "GPT-6 Astra (Pro/Business/Enterprise)"]
+    org: OpenAI
+    license: "proprietary; OpenAI Terms of Use"
+    reason: "provider terms prohibit using outputs to develop competing models (re-check before each release)"
+    rule: "outputs stored only under evals/; hard-blocked from every training dataset"
+    status: eval-only

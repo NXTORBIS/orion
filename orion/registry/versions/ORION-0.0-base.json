@@ -1,0 +1,247 @@
+{
+  "version": "ORION-0.0-base",
+  "weights": "Qwen/Qwen3.5-0.8B-Base",
+  "weights_owner": "Alibaba (Qwen3.5-0.8B-Base)",
+  "weights_license": "Apache-2.0",
+  "orion_modified": false,
+  "adapter": null,
+  "training_run_card": null,
+  "dataset_version": null,
+  "training_config": {},
+  "evaluations": {
+    "synth-math": {
+      "n": 100,
+      "accuracy": 0.39,
+      "ci": [
+        0.3,
+        0.49
+      ],
+      "by_group": {
+        "arithmetic": {
+          "n": 11,
+          "accuracy": 1.0,
+          "ci": [
+            1.0,
+            1.0
+          ]
+        },
+        "gcd_lcm": {
+          "n": 10,
+          "accuracy": 0.0,
+          "ci": [
+            0.0,
+            0.0
+          ]
+        },
+        "geometry": {
+          "n": 4,
+          "accuracy": 0.5,
+          "ci": [
+            0.0,
+            1.0
+          ]
+        },
+        "linear": {
+          "n": 11,
+          "accuracy": 0.2727272727272727,
+          "ci": [
+            0.0,
+            0.5454545454545454
+          ]
+        },
+        "modular": {
+          "n": 9,
+          "accuracy": 0.6666666666666666,
+          "ci": [
+            0.3333333333333333,
+            1.0
+          ]
+        },
+        "percent": {
+          "n": 11,
+          "accuracy": 0.8181818181818182,
+          "ci": [
+            0.5454545454545454,
+            1.0
+          ]
+        },
+        "quadratic": {
+          "n": 9,
+          "accuracy": 0.0,
+          "ci": [
+            0.0,
+            0.0
+          ]
+        },
+        "rate": {
+          "n": 9,
+          "accuracy": 0.0,
+          "ci": [
+            0.0,
+            0.0
+          ]
+        },
+        "sequence": {
+          "n": 10,
+          "accuracy": 0.3,
+          "ci": [
+            0.0,
+            0.6
+          ]
+        },
+        "system": {
+          "n": 11,
+          "accuracy": 0.0,
+          "ci": [
+            0.0,
+            0.0
+          ]
+        },
+        "work": {
+          "n": 5,
+          "accuracy": 1.0,
+          "ci": [
+            1.0,
+            1.0
+          ]
+        }
+      },
+      "by_level": {
+        "1": {
+          "n": 40,
+          "accuracy": 0.625,
+          "ci": [
+            0.475,
+            0.775
+          ]
+        },
+        "2": {
+          "n": 60,
+          "accuracy": 0.23333333333333334,
+          "ci": [
+            0.13333333333333333,
+            0.35
+          ]
+        }
+      },
+      "task": "synth-math",
+      "standard_benchmark": false,
+      "model": "Qwen3.5-0.8B-Base",
+      "seconds": 1321.5,
+      "items_per_minute": 4.54,
+      "outputs": "C:\\Users\\ksran\\Downloads\\AI\\orion\\runs\\evals\\orion-0.1\\baseline.jsonl",
+      "timestamp_utc": "2026-09-11T16:38:47+00:00",
+      "no_answer_extracted": 0
+    }
+  },
+  "regression_suite": {
+    "synth-math": {
+      "synth-math-arithmetic-1000000": true,
+      "synth-math-linear-1000000": false,
+      "synth-math-system-1000000": false,
+      "synth-math-percent-1000000": true,
+      "synth-math-rate-1000000": false,
+      "synth-math-quadratic-1000000": false,
+      "synth-math-gcd_lcm-1000000": false,
+      "synth-math-modular-1000000": true,
+      "synth-math-sequence-1000000": false,
+      "synth-math-arithmetic-1000001": true,
+      "synth-math-linear-1000001": true,
+      "synth-math-system-1000001": false,
+      "synth-math-percent-1000001": true,
+      "synth-math-rate-1000001": false,
+      "synth-math-gcd_lcm-1000001": false,
+      "synth-math-modular-1000001": true,
+      "synth-math-sequence-1000001": false,
+      "synth-math-geometry-1000001": true,
+      "synth-math-arithmetic-1000002": true,
+      "synth-math-linear-1000002": true,
+      "synth-math-system-1000002": false,
+      "synth-math-percent-1000002": true,
+      "synth-math-rate-1000002": false,
+      "synth-math-work-1000002": true,
+      "synth-math-quadratic-1000002": false,
+      "synth-math-gcd_lcm-1000002": false,
+      "synth-math-sequence-1000002": false,
+      "synth-math-arithmetic-1000003": true,
+      "synth-math-linear-1000003": false,
+      "synth-math-system-1000003": false,
+      "synth-math-percent-1000003": true,
+      "synth-math-rate-1000003": false,
+      "synth-math-work-1000003": true,
+      "synth-math-quadratic-1000003": false,
+      "synth-math-gcd_lcm-1000003": false,
+      "synth-math-modular-1000003": true,
+      "synth-math-sequence-1000003": false,
+      "synth-math-arithmetic-1000004": true,
+      "synth-math-linear-1000004": true,
+      "synth-math-system-1000004": false,
+      "synth-math-percent-1000004": true,
+      "synth-math-rate-1000004": false,
+      "synth-math-work-1000004": true,
+      "synth-math-quadratic-1000004": false,
+      "synth-math-gcd_lcm-1000004": false,
+      "synth-math-modular-1000004": false,
+      "synth-math-sequence-1000004": false,
+      "synth-math-arithmetic-1000005": true,
+      "synth-math-linear-1000005": false,
+      "synth-math-system-1000005": false,
+      "synth-math-percent-1000005": true,
+      "synth-math-rate-1000005": false,
+      "synth-math-work-1000005": true,
+      "synth-math-quadratic-1000005": false,
+      "synth-math-gcd_lcm-1000005": false,
+      "synth-math-modular-1000005": false,
+      "synth-math-sequence-1000005": true,
+      "synth-math-arithmetic-1000006": true,
+      "synth-math-linear-1000006": false,
+      "synth-math-system-1000006": false,
+      "synth-math-percent-1000006": false,
+      "synth-math-quadratic-1000006": false,
+      "synth-math-gcd_lcm-1000006": false,
+      "synth-math-modular-1000006": false,
+      "synth-math-sequence-1000006": false,
+      "synth-math-geometry-1000006": true,
+      "synth-math-arithmetic-1000007": true,
+      "synth-math-linear-1000007": false,
+      "synth-math-system-1000007": false,
+      "synth-math-percent-1000007": true,
+      "synth-math-rate-1000007": false,
+      "synth-math-quadratic-1000007": false,
+      "synth-math-gcd_lcm-1000007": false,
+      "synth-math-modular-1000007": true,
+      "synth-math-sequence-1000007": true,
+      "synth-math-geometry-1000007": false,
+      "synth-math-arithmetic-1000008": true,
+      "synth-math-linear-1000008": false,
+      "synth-math-system-1000008": false,
+      "synth-math-percent-1000008": true,
+      "synth-math-quadratic-1000008": false,
+      "synth-math-gcd_lcm-1000008": false,
+      "synth-math-modular-1000008": true,
+      "synth-math-sequence-1000008": false,
+      "synth-math-geometry-1000008": false,
+      "synth-math-arithmetic-1000009": true,
+      "synth-math-linear-1000009": false,
+      "synth-math-system-1000009": false,
+      "synth-math-percent-1000009": true,
+      "synth-math-rate-1000009": false,
+      "synth-math-work-1000009": true,
+      "synth-math-quadratic-1000009": false,
+      "synth-math-gcd_lcm-1000009": false,
+      "synth-math-modular-1000009": true,
+      "synth-math-sequence-1000009": true,
+      "synth-math-arithmetic-1000010": true,
+      "synth-math-linear-1000010": false,
+      "synth-math-system-1000010": false,
+      "synth-math-percent-1000010": false,
+      "synth-math-rate-1000010": false
+    }
+  },
+  "known_weaknesses": [],
+  "improvements": [],
+  "parent_version": null,
+  "status": "archived",
+  "promotion": {},
+  "created_utc": "2026-09-11T19:19:01+00:00"
+}

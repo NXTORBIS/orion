@@ -1,0 +1,45 @@
+# ORION-0.1 — pipeline profile for the procedurally generated, verifier-checked math set.
+# Differences from laptop_v0 and why:
+#   * near_threshold 0.95: problems from one template differ only in numbers, so ordinary
+#     near-dedup (0.8) would delete most of a legitimate set; 0.95 still removes true repeats.
+#   * min_words 12: a worked arithmetic problem is short.
+#   * contamination stage OFF for this source: every dice problem shares its first 13 words
+#     with every other dice problem, so benchmark-style n-gram overlap is not a leakage signal
+#     here. Train/test disjointness is guaranteed by construction (disjoint seed ranges, exact
+#     problem-text exclusion) and re-checked explicitly by scripts/phase6_experiment.py.
+purpose: train
+registry: registry/licenses/datasets.yaml
+tokenizer: models/Qwen3.5-0.8B-Base
+output_dir: data/processed/synth_math_v1
+validation_fraction: 0.05
+
+sources:
+  - {path: data/raw/synth_math/train.jsonl, source: orion-synth-math, text_field: text, id_field: id, split: train}
+
+stages:
+  language:
+    enabled: true
+    allowed: [eng, und_Latn]      # short math text rarely reaches the stop-word threshold for "eng"
+  pii: {enabled: true}
+  toxicity: {enabled: true}
+  heuristics:
+    enabled: true
+    # Gopher's prose rules reject math text: numbers are not alphabetic "words" and are short.
+    # First run with web thresholds kept 31 of 1200 items; these keep the spam/repetition rules
+    # and relax only the two prose-shape rules.
+    # n-gram repetition rules are also off-signal here: every template repeats phrases such as
+    # "so the probability is"; duplicates are handled by the dedup stage instead.
+    thresholds:
+      min_words: 12
+      min_alpha_words: 0.25
+      mean_word_len: [2.0, 12.0]
+      max_top_ngram_chars: [0.6, 0.6, 0.6]
+      max_dup_ngram_chars: [0.6, 0.6, 0.6, 0.6, 0.6, 0.6]
+  dedup:
+    enabled: true
+    near_threshold: 0.95
+  quality:
+    enabled: true
+    min_heuristic_score: 0.3
+  classify: {enabled: true}
+  contamination: {enabled: false}
