@@ -16,3 +16,8 @@ __pycache__/
 *.safetensors
 *.gguf
 *.zip
+
+# Runtime logs
+training-superior-ai.log
+parallel-data-gen.log
+*.log
