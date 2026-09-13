@@ -1,0 +1,50 @@
+{
+  "total_examples": 11195,
+  "categories": 32,
+  "category_breakdown": {
+    "Matrix Operations": 100,
+    "Determinants": 100,
+    "System of Equations": 90,
+    "Rank and Basis": 100,
+    "Derivatives - Power Rule": 200,
+    "Derivatives - Chain Rule": 200,
+    "Integration - Power Rule": 200,
+    "Limits": 200,
+    "Taylor Series": 200,
+    "Quadratic Equations": 31,
+    "Polynomial Factorization": 200,
+    "Complex Numbers": 200,
+    "Rational Simplification": 200,
+    "Algebraic Inequalities": 200,
+    "Area Calculations": 100,
+    "Distance and Angles": 100,
+    "Coordinate Geometry": 74,
+    "Area and Volume": 100,
+    "Transformations": 100,
+    "Mathematical Induction": 100,
+    "Contradiction Proofs": 100,
+    "Direct Proofs": 100,
+    "Equivalence Proofs": 100,
+    "Symbolic Manipulation": 100,
+    "Differential Equations": 1000,
+    "Number Theory": 1000,
+    "Combinatorics": 1000,
+    "Optimization": 1000,
+    "Trigonometry": 1000,
+    "Complex Analysis": 1000,
+    "Series and Sequences": 1000,
+    "Multi-Domain Problems": 1000
+  },
+  "difficulty_distribution": {
+    "easy": 2017,
+    "medium": 5453,
+    "hard": 3725
+  },
+  "avg_reasoning_depth": 3.1326485037963376,
+  "verification_rate": 1.0,
+  "splits": {
+    "train": 10000,
+    "validation": 500,
+    "test": 500
+  }
+}
