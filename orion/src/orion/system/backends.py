@@ -16,7 +16,7 @@ import subprocess
 import time
 import urllib.error
 import urllib.request
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -41,6 +41,8 @@ class ScriptedBackend:
 
 
 class HFBackend:
+    supports_sampling = False  # HFGenerator decodes greedily, so extra "samples" would be exact repeats
+
     def __init__(self, model_dir: str | Path, adapter_dir: str | Path | None = None, max_new_tokens: int = 512):
         from orion.evals.runner import HFGenerator
 
@@ -161,21 +163,45 @@ class VisionBackend:
 
 
 class LlamaServerBackend:
-    def __init__(self, base_url: str = "http://127.0.0.1:8080", name: str = "llama-server", timeout: float = 600.0):
-        self.base_url, self.name, self.timeout = base_url.rstrip("/"), name, timeout
+    def __init__(self, base_url: str = "http://127.0.0.1:8080", name: str = "llama-server", timeout: float = 600.0, thinking: bool = True):
+        self.base_url, self.name, self.timeout, self.thinking = base_url.rstrip("/"), name, timeout, thinking
+
+    def _request(self, path: str, payload: dict[str, Any]) -> urllib.request.Request:
+        return urllib.request.Request(self.base_url + path, data=json.dumps(payload).encode("utf-8"),
+                                      headers={"Content-Type": "application/json"}, method="POST")
 
     def _post(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
-        req = urllib.request.Request(self.base_url + path, data=json.dumps(payload).encode("utf-8"),
-                                     headers={"Content-Type": "application/json"}, method="POST")
-        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+        with urllib.request.urlopen(self._request(path, payload), timeout=self.timeout) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
-    def chat(self, messages: list[Message], max_tokens: int = 512, temperature: float = 0.0, stop: list[str] | None = None) -> str:
+    def _payload(self, messages: list[Message], max_tokens: int, temperature: float, stop: list[str] | None) -> dict[str, Any]:
         payload: dict[str, Any] = {"messages": messages, "max_tokens": max_tokens, "temperature": temperature}
         if stop:
             payload["stop"] = stop
-        out = self._post("/v1/chat/completions", payload)
+        if not self.thinking:
+            # Qwen3 templates otherwise emit a hidden <think> block first, which is most of the wait on a CPU.
+            payload["chat_template_kwargs"] = {"enable_thinking": False}
+        return payload
+
+    def chat(self, messages: list[Message], max_tokens: int = 512, temperature: float = 0.0, stop: list[str] | None = None) -> str:
+        out = self._post("/v1/chat/completions", self._payload(messages, max_tokens, temperature, stop))
         return out["choices"][0]["message"]["content"].strip()
+
+    def chat_stream(self, messages: list[Message], max_tokens: int = 512, temperature: float = 0.0) -> Iterator[str]:
+        """Yield answer text as llama-server generates it (OpenAI-style SSE)."""
+        payload = {**self._payload(messages, max_tokens, temperature, None), "stream": True}
+        with urllib.request.urlopen(self._request("/v1/chat/completions", payload), timeout=self.timeout) as resp:
+            for raw in resp:
+                line = raw.decode("utf-8").strip()
+                if not line.startswith("data:"):
+                    continue
+                data = line[5:].strip()
+                if data == "[DONE]":
+                    return
+                choices = json.loads(data).get("choices") or [{}]
+                piece = (choices[0].get("delta") or {}).get("content")
+                if piece:
+                    yield piece
 
     def healthy(self) -> bool:
         try:
@@ -189,7 +215,7 @@ def start_llama_server(model_path: str | Path, port: int = 8080, threads: int = 
                        exe: str | Path = "tools/llama.cpp/llama-server.exe", wait_s: float = 300.0) -> tuple[subprocess.Popen, LlamaServerBackend]:
     """Launch llama-server on a GGUF file and wait until /health answers."""
     cmd = [str(exe), "-m", str(model_path), "--port", str(port), "-t", str(threads), "-c", str(ctx), "-np", str(parallel),
-           "--host", "127.0.0.1", "--temp", "0"]
+           "--host", "127.0.0.1", "--temp", "0", "--jinja"]
     proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     backend = LlamaServerBackend(f"http://127.0.0.1:{port}")
     t0 = time.time()

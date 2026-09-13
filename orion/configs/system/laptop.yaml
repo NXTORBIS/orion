@@ -8,6 +8,7 @@ backends:
     threads: 10
     ctx: 8192
     autostart: true
+    thinking: false               # skip Qwen3's hidden <think> pass; it dominated reply time on CPU
   reasoning:
     kind: hf                      # ORION-0.1 adapter on Qwen3.5-0.8B-Base once trained; used for math routing
     model: models/Qwen3.5-0.8B-Base

@@ -131,10 +131,10 @@ class MemoryStore:
             self.working = {}
         self.save()
 
-    def memory_prompt(self, query: str, session: str) -> str:
+    def memory_prompt(self, query: str, session: str, recall: bool = True) -> str:
         parts = []
         if facts := self.approved_facts():
             parts.append("Known about the user (approved by them):\n- " + "\n- ".join(facts))
-        if past := self.recall(query, k=2):
+        if recall and (past := self.recall(query, k=2)):
             parts.append("Relevant earlier exchanges:\n" + "\n".join(f"- User: {p['user'][:200]} / Assistant: {p['assistant'][:200]}" for p in past))
         return "\n\n".join(parts)

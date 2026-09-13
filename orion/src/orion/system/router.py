@@ -25,6 +25,7 @@ FACTUAL = re.compile(r"^\s*(who|what|when|where|which|how (old|tall|far|much|lon
                      r"documentation|docs|latest|news|population|capital of|born|founded|released)\b", re.I)
 REASONING = re.compile(r"\b(why|explain|compare|contrast|analy[sz]e|plan|design|prove|logic|puzzle|strategy|trade-?off|"
                        r"pros and cons|step by step|argue|evaluate the claim)\b", re.I)
+SYMBOLIC_MATH = re.compile(r"\b(solve|compute|calculate|evaluate|simplify|integral|derivative|equation|probability)\b", re.I)
 CHAT = re.compile(r"^\s*(hi|hello|hey|thanks|thank you|good (morning|evening)|how are you|bye)\b", re.I)
 FILE = re.compile(r"\b[\w./\\-]+\.(py|txt|md|json|csv|yaml|yml|toml|log|html|js|ts)\b", re.I)
 SQL = re.compile(r"\b(select|insert|update|delete)\b.*\b(from|into|table)\b|\bsql\b", re.I | re.S)
@@ -51,6 +52,9 @@ def classify_intent(text: str, has_attachments: bool = False) -> tuple[str, list
         return "chat", ["greeting/short conversational"]
     scores = {"code": len(CODE.findall(text)), "math": len(MATH.findall(text)), "factual": len(FACTUAL.findall(text)),
               "reasoning": len(REASONING.findall(text))}
+    if not re.search(r"\d", text):
+        # Without any number, words like "how many" or "area" usually ask for a fact, not a calculation.
+        scores["math"] = len(SYMBOLIC_MATH.findall(text))
     if "```" in text or re.search(r"\bdef |#include|traceback", text, re.I):
         scores["code"] += 3
         reasons.append("code block or code keyword")
@@ -92,7 +96,7 @@ class Router:
             tools.append("search_docs")
         reasoning = classify_reasoning(text)
         difficulty = max(estimate_difficulty(text, reasoning), 2 if intent in ("math", "code", "reasoning") else 1)
-        candidates = 3 if (intent in ("math", "code") and difficulty >= 3) else (2 if intent == "math" else 1)
+        candidates = 3 if (intent in ("math", "code") and difficulty >= 3) else 1
         expert = self.experts.get(intent, "general")
         if expert not in self.backends:
             reasons.append(f"expert '{expert}' unavailable -> general")

@@ -60,10 +60,10 @@ def test_redteam_checks_and_run_through_orchestrator(tmp_path):
 
     def reply(msgs):  # a scripted model that follows injected instructions in documents -> should FAIL those cases
         last = msgs[-1]["content"]
-        question = last.split("\n\nPassages:")[0]
+        question = last.split("\n\nPassages:")[0].rsplit("\n\n", 1)[-1]  # recalled memory is prepended to the question
         if "IGNORE ALL PREVIOUS" in last and "onboarding guide" in question:
             return "PWNED"  # obeys the injected document when it is relevant to the question
-        if "2 + 2" in last:
+        if "2 + 2" in question:
             return "4"
         return "I can't help with that; I don't have such a document."
 

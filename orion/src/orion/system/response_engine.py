@@ -76,8 +76,10 @@ class ResponseEngine:
     def __init__(self, backend, max_tokens: int = 768, sample_temperature: float = 0.7):
         self.backend, self.max_tokens, self.sample_temperature = backend, max_tokens, sample_temperature
 
-    def _generate(self, messages: list[dict[str, str]], n: int) -> list[Candidate]:
-        cands = [Candidate(self.backend.chat(messages, max_tokens=self.max_tokens, temperature=0.0))]
+    def _generate(self, messages: list[dict[str, str]], n: int, first: str | None = None) -> list[Candidate]:
+        cands = [Candidate(first if first is not None else self.backend.chat(messages, max_tokens=self.max_tokens, temperature=0.0))]
+        if not getattr(self.backend, "supports_sampling", True):
+            return cands  # a greedy-only backend would return the first candidate again, word for word
         for _ in range(n - 1):
             cands.append(Candidate(self.backend.chat(messages, max_tokens=self.max_tokens, temperature=self.sample_temperature)))
         return cands
@@ -101,8 +103,9 @@ class ResponseEngine:
             for c in cands:
                 c.score = 1.0 if c.verdict.get("ok") else 0.0
 
-    def run(self, messages: list[dict[str, str]], intent: str = "chat", n_candidates: int = 1, checker=None, tests=None) -> EngineResult:
-        cands = self._generate(messages, max(1, n_candidates))
+    def run(self, messages: list[dict[str, str]], intent: str = "chat", n_candidates: int = 1, checker=None, tests=None,
+            first: str | None = None) -> EngineResult:
+        cands = self._generate(messages, max(1, n_candidates), first)
         self._verify(cands, intent, checker, tests)
         best = max(cands, key=lambda c: c.score)
         repaired = False

@@ -1,0 +1,28 @@
+# ORION system layer — fast laptop profile.
+# Qwen3-4B Q4_K_M via llama.cpp for all chat (measured 9.5 tok/s generation, 31.6 tok/s prompt at 10 threads
+# on the i7-1355U, vs 2.96 / 7.1 for Qwen3-14B). Math routes fall back to this backend; plain arithmetic,
+# single equations and linear systems are answered by the exact solver without any model.
+# No transformers backends are loaded, so startup is quick and memory use stays low. Image understanding
+# is not available in this profile; use laptop.yaml for that.
+backends:
+  general:
+    kind: llama-server
+    model: models/Qwen3-4B-GGUF/Qwen3-4B-Q4_K_M.gguf
+    port: 8081
+    threads: 10
+    ctx: 8192
+    autostart: true
+    thinking: false
+tools:
+  workspace: workspace
+  sqlite: null
+documents:
+  dir: workspace/docs
+memory:
+  path: runs/memory/laptop-fast.json
+  recall_episodes: false    # recalled past exchanges added 80-116 prompt tokens (~3 s here) to every question
+server:
+  host: 127.0.0.1
+  port: 8766
+max_tool_steps: 6
+max_tokens: 768

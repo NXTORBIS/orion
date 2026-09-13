@@ -20,7 +20,8 @@ def test_router_intents_and_tools():
     assert Router.accuracy(LABELLED) >= 0.9
     r = Router(available_backends={"general", "reasoning", "coding"}, available_tools={"calculator", "python", "read_file", "search_docs"}, has_documents=True)
     m = r.route("Compute (47 + 12) × 3.")
-    assert m.intent == "math" and m.expert == "reasoning" and m.needs_tools[:2] == ["calculator", "python"] and m.candidates >= 2
+    assert m.intent == "math" and m.expert == "reasoning" and m.needs_tools[:2] == ["calculator", "python"]
+    assert m.candidates == (3 if m.difficulty >= 3 else 1)
     c = r.route("Read src/app.py and fix the bug in the parser function.")
     assert c.intent == "code" and c.expert == "coding" and "read_file" in c.needs_tools and "python" in c.needs_tools
     f = r.route("What does the documentation say about the retry policy?")
@@ -28,6 +29,8 @@ def test_router_intents_and_tools():
     v = r.route("What is in this picture?", attachments=["img.png"])
     assert v.intent == "vision" and v.expert == "general" and any("unavailable" in x for x in v.reasons)
     assert classify_intent("hello")[0] == "chat"
+    assert classify_intent("How many legs does a spider have?")[0] != "math"
+    assert classify_intent("How many apples are left if I eat 3 of 10?")[0] == "math"
 
 
 def test_response_engine_candidates_verification_and_repair():
@@ -59,7 +62,7 @@ def make_orchestrator(tmp_path, reply):
 
 def test_orchestrator_tool_loop_math_verification_retrieval_and_memory(tmp_path):
     def reply(msgs):
-        last = msgs[-1]["content"]
+        last = msgs[-1]["content"].rsplit("\n\n", 1)[-1]  # recalled memory is prepended to the question
         if last.startswith("<tool_response>"):
             return "The calculator gives 177.\n#### 177"
         if "Compute" in last and "<tool_call>" not in "".join(m["content"] for m in msgs if m["role"] == "assistant"):
@@ -69,7 +72,7 @@ def test_orchestrator_tool_loop_math_verification_retrieval_and_memory(tmp_path)
         return "Noted."
 
     orch, backend = make_orchestrator(tmp_path, reply)
-    r = orch.answer("Compute (47 + 12) × 3.", session="s1")
+    r = orch.answer("Compute the cost of 3 boxes at (47 + 12) dollars each.", session="s1")
     assert r.route.intent == "math" and r.tool_trace and r.tool_trace[0]["call"]["name"] == "calculator" and r.tool_trace[0]["output"] == "177"
     assert r.text.endswith("#### 177") and r.verification["checker"]["ok"] and r.trace["expert"] == "general-scripted"
     assert "<tool_call>" not in r.text
@@ -83,4 +86,36 @@ def test_orchestrator_tool_loop_math_verification_retrieval_and_memory(tmp_path)
     assert orch.memory.approve(m.proposed_memory["id"]) and orch.memory.approved_facts() == ["I prefer answers in metric units"]
     assert len(orch.memory.context("s1")) == 6 and orch.memory.recall("retry policy backoff")
     again = orch.answer("hello", session="s1")
-    assert "metric units" in again.trace["messages"][0]["content"]
+    assert "metric units" in again.trace["messages"][-1]["content"] and "metric units" not in again.trace["messages"][0]["content"]
+
+
+def test_episode_recall_switch_and_warm_up(tmp_path):
+    orch, backend = make_orchestrator(tmp_path, lambda msgs: "Noted.")
+    orch.answer("Tell me the history of the retry policy", session="a")
+    assert "Relevant earlier exchanges" in orch.answer("hello, retry policy", session="b").trace["messages"][-1]["content"]
+    orch.recall_episodes = False
+    assert "Relevant earlier exchanges" not in orch.answer("hello, retry policy", session="c").trace["messages"][-1]["content"]
+    backend.calls.clear()
+    orch.warm_up([backend])
+    assert len(backend.calls) == 2 and backend.calls[0][0]["content"] != backend.calls[1][0]["content"]
+
+
+def test_exact_solver_answers_without_calling_a_model(tmp_path):
+    orch, backend = make_orchestrator(tmp_path, lambda msgs: "the model was called")
+    r = orch.answer("Compute (47 + 12) × 3.", session="s2")
+    assert r.text.endswith("#### 177") and r.route.expert == "exact-solver" and backend.calls == []
+
+
+def test_greedy_backend_gets_one_candidate_and_tool_loop_reply_is_reused():
+    backend = ScriptedBackend(lambda msgs: "It is 42.\n#### 42")
+    backend.supports_sampling = False
+    res = ResponseEngine(backend).run([{"role": "user", "content": "6 times 7?"}], intent="math", n_candidates=3)
+    assert len(backend.calls) == 1 and res.text.endswith("#### 42")
+    res2 = ResponseEngine(backend).run([{"role": "user", "content": "6 times 7?"}], intent="math", n_candidates=3, first="Reused.\n#### 42")
+    assert len(backend.calls) == 1 and res2.text.startswith("Reused")
+
+
+def test_streaming_still_uses_the_exact_solver(tmp_path):
+    orch, backend = make_orchestrator(tmp_path, lambda msgs: "the model was called")
+    pieces = list(orch.answer_stream("Compute (47 + 12) × 3.", session="s3"))
+    assert pieces and pieces[-1].endswith("#### 177") and backend.calls == []

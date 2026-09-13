@@ -59,6 +59,7 @@ def build_backends(cfg: dict[str, Any], root: Path, dry_run: bool = False) -> tu
                                                    exe=root / "tools/llama.cpp/llama-server.exe")
                 backend.name = f"{name}:{Path(spec['model']).name}"
                 processes.append(proc)
+            backend.thinking = spec.get("thinking", True)
             backends[name] = backend
         else:
             raise ValueError(f"unknown backend kind {kind!r} for {name}")
@@ -68,6 +69,7 @@ def build_backends(cfg: dict[str, Any], root: Path, dry_run: bool = False) -> tu
 def build_system(config_path: str | Path, dry_run: bool = False, backends: dict[str, Any] | None = None) -> System:
     cfg = yaml.safe_load(Path(config_path).read_text(encoding="utf-8"))
     root = project_root()
+    built_here = backends is None
     if backends is None:
         backends, processes = build_backends(cfg, root, dry_run)
     else:
@@ -80,6 +82,8 @@ def build_system(config_path: str | Path, dry_run: bool = False, backends: dict[
     sqlite = cfg.get("tools", {}).get("sqlite")
     tools = default_registry(workspace=workspace, retriever=retriever, db_path=root / sqlite if sqlite else None)
     memory = MemoryStore(root / cfg.get("memory", {}).get("path", "runs/memory/default.json"))
-    orch = Orchestrator(backends, tools=tools, retriever=retriever, memory=memory,
-                        max_tool_steps=cfg.get("max_tool_steps", 6), max_tokens=cfg.get("max_tokens", 768))
+    orch = Orchestrator(backends, tools=tools, retriever=retriever, memory=memory, max_tool_steps=cfg.get("max_tool_steps", 6),
+                        max_tokens=cfg.get("max_tokens", 768), recall_episodes=cfg.get("memory", {}).get("recall_episodes", True))
+    if built_here:
+        orch.warm_up([b for name, b in backends.items() if cfg.get("backends", {}).get(name, {}).get("kind") == "llama-server"])
     return System(orch, cfg, processes)

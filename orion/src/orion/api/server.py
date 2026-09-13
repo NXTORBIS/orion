@@ -86,14 +86,51 @@ def make_handler(system: System):
                 if not user:
                     return self._send(400, {"error": "no user message"})
                 session = body.get("session") or body.get("user") or "default"
-                with lock:  # one generation at a time on this machine
-                    r = system.orchestrator.answer(user, session=session)
                 tid = uuid.uuid4().hex[:12]
-                system.traces[tid] = {"id": tid, "route": r.route.__dict__, "tool_trace": r.tool_trace, "verification": r.verification, "trace": r.trace}
-                return self._send(200, {"id": f"chatcmpl-{tid}", "object": "chat.completion", "model": r.trace["expert"],
-                                        "choices": [{"index": 0, "message": {"role": "assistant", "content": r.text}, "finish_reason": "stop"}],
-                                        "orion": {"trace_id": tid, "intent": r.route.intent, "expert": r.route.expert, "tools_used": [t["call"].get("name") for t in r.tool_trace if isinstance(t["call"], dict)],
-                                                  "citations": r.citations, "verified": r.verification.get("ok"), "proposed_memory": r.proposed_memory}})
+
+                def meta(r) -> dict[str, Any]:
+                    system.traces[tid] = {"id": tid, "route": r.route.__dict__, "tool_trace": r.tool_trace, "verification": r.verification, "trace": r.trace}
+                    return {"trace_id": tid, "intent": r.route.intent, "expert": r.route.expert, "tools_used": [t["call"].get("name") for t in r.tool_trace if isinstance(t["call"], dict)],
+                            "citations": r.citations, "verified": r.verification.get("ok"), "proposed_memory": r.proposed_memory}
+
+                if not body.get("stream"):
+                    with lock:  # one generation at a time on this machine
+                        r = system.orchestrator.answer(user, session=session)
+                    return self._send(200, {"id": f"chatcmpl-{tid}", "object": "chat.completion", "model": r.trace["expert"],
+                                            "choices": [{"index": 0, "message": {"role": "assistant", "content": r.text}, "finish_reason": "stop"}],
+                                            "orion": meta(r)})
+
+                def event(payload: Any) -> None:
+                    data = payload if isinstance(payload, bytes) else json.dumps(payload, ensure_ascii=False, default=str).encode("utf-8")
+                    self.wfile.write(b"data: " + data + b"\n\n")
+                    self.wfile.flush()
+
+                def chunk(delta: dict[str, Any], finish: str | None = None) -> dict[str, Any]:
+                    return {"id": f"chatcmpl-{tid}", "object": "chat.completion.chunk", "choices": [{"index": 0, "delta": delta, "finish_reason": finish}]}
+
+                self.send_response(200)
+                self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+                self.send_header("Cache-Control", "no-cache")
+                self.end_headers()
+                self.close_connection = True
+                with lock:
+                    gen = system.orchestrator.answer_stream(user, session=session)
+                    try:
+                        while True:
+                            piece = next(gen)
+                            if piece:
+                                event(chunk({"content": piece}))
+                    except StopIteration as done:
+                        r = done.value
+                    except OSError:  # client went away: stop generating instead of finishing for nobody
+                        gen.close()
+                        return
+                try:
+                    event({**chunk({}, "stop"), "model": r.trace["expert"], "orion": meta(r)})
+                    event(b"[DONE]")
+                except OSError:
+                    pass
+                return
             if path == "/v1/vision":
                 image_b64 = body.get("image", "")
                 prompt = body.get("prompt", "")
