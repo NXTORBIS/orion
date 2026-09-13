@@ -1,8 +1,53 @@
-Traceback (most recent call last):
-  File "C:\Users\ksran\Downloads\AI\orion\src\orion\train\sft.py", line 21, in <module>
-    from .common import RunCard, dataset_manifest, load_config, load_model, load_tokenizer, lora_config, project_root, setup_mlflow
-ImportError: attempted relative import with no known parent package
-Traceback (most recent call last):
-  File "C:\Users\ksran\Downloads\AI\orion\src\orion\train\sft.py", line 21, in <module>
-    from .common import RunCard, dataset_manifest, load_config, load_model, load_tokenizer, lora_config, project_root, setup_mlflow
-ImportError: attempted relative import with no known parent package
+C:\Users\ksran\AppData\Local\Programs\Python\Python312\python.exe: Error while finding module specification for 'orion.train.sft' (ModuleNotFoundError: No module named 'orion')
+C:\Users\ksran\AppData\Local\Programs\Python\Python312\python.exe: Error while finding module specification for 'orion.train.sft' (ModuleNotFoundError: No module named 'orion')
+C:\Users\ksran\AppData\Local\Programs\Python\Python312\python.exe: Error while finding module specification for 'orion.train.sft' (ModuleNotFoundError: No module named 'orion')
+
+    ================================================================
+    CHATGPT-LEVEL ORION CONTINUOUS TRAINING
+    Target: ChatGPT parity on all 8 domains (77%+ blended)
+    Run: Indefinitely until reaching ChatGPT level
+    ================================================================
+    
+
+######################################################################
+# CHATGPT-LEVEL ITERATION 1 - 2026-09-13T21:39:25.813440
+# Current: ORION-0.1 @ 55.0% (Target: 77.0%)
+# Progress: 71% to ChatGPT parity
+######################################################################
+
+[STEP 1/3] CHATGPT-LEVEL TRAINING (1000 steps)
+Domains: Math, Science, Sequences, Systems, Coding, Reasoning, Knowledge, Instruction
+
+======================================================================
+[21:39:25] Training ORION-0.2 toward ChatGPT parity (~8-12 hours)
+======================================================================
+Training failed!
+
+######################################################################
+# CHATGPT-LEVEL ITERATION 2 - 2026-09-13T21:40:25.862381
+# Current: ORION-0.1 @ 55.0% (Target: 77.0%)
+# Progress: 71% to ChatGPT parity
+######################################################################
+
+[STEP 1/3] CHATGPT-LEVEL TRAINING (1000 steps)
+Domains: Math, Science, Sequences, Systems, Coding, Reasoning, Knowledge, Instruction
+
+======================================================================
+[21:40:25] Training ORION-0.2 toward ChatGPT parity (~8-12 hours)
+======================================================================
+Training failed!
+
+######################################################################
+# CHATGPT-LEVEL ITERATION 3 - 2026-09-13T21:41:25.893204
+# Current: ORION-0.1 @ 55.0% (Target: 77.0%)
+# Progress: 71% to ChatGPT parity
+######################################################################
+
+[STEP 1/3] CHATGPT-LEVEL TRAINING (1000 steps)
+Domains: Math, Science, Sequences, Systems, Coding, Reasoning, Knowledge, Instruction
+
+======================================================================
+[21:41:25] Training ORION-0.2 toward ChatGPT parity (~8-12 hours)
+======================================================================
+Training failed!
+Multiple training failures. Aborting.

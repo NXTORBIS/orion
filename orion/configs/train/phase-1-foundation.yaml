@@ -1,0 +1,31 @@
+run_name: orion-phase-1-foundation
+experiment: superior-ai-phase-1
+model: models/Qwen3.5-0.8B-Base
+device: cpu
+dtype: fp32
+gradient_checkpointing: false
+train_file: data/processed/chatgpt_level_combined/sft_train.jsonl
+eval_file: data/processed/chatgpt_level_combined/sft_validation.jsonl
+output_dir: checkpoints/orion-phase-1-foundation
+seed: 42
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: all-linear
+
+hyperparameters:
+  max_length: 512
+  learning_rate: 2.0e-4
+  lr_scheduler: cosine
+  warmup_steps: 10
+  batch_size: 2
+  grad_accum: 4
+  epochs: 1
+  max_steps: 500
+  logging_steps: 10
+  save_steps: 50
+  eval_steps: 50
+
+report_to: [mlflow]
