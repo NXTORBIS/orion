@@ -31,6 +31,7 @@ Not in git: `models/` (weights), `data/`, `checkpoints/`, `runs/`, `tools/` (lla
 ## Running
 
 ```bash
+uv pip install --python .venv/Scripts/python.exe -e . --no-deps          # once: makes `python -m orion...` importable
 .venv/Scripts/python.exe -m pytest -q                                   # tests
 .venv/Scripts/python.exe -m orion.data.pipeline configs/data/laptop_v0.yaml
 .venv/Scripts/python.exe scripts/phase6_experiment.py --n-train 1200 --n-test 100
