@@ -23,6 +23,9 @@ from .common import RunCard, dataset_manifest, load_config, load_model, load_tok
 
 def make_sft_config(cfg: dict[str, Any], output_dir: Path, has_eval: bool) -> SFTConfig:
     hp = cfg.get("hyperparameters", {})
+    report_to = cfg.get("report_to", [])
+    if not report_to:
+        report_to = []
     return SFTConfig(
         output_dir=str(output_dir), run_name=cfg.get("run_name"), seed=cfg.get("seed", 0),
         max_length=hp.get("max_length", 1024), packing=hp.get("packing", False),
@@ -34,7 +37,7 @@ def make_sft_config(cfg: dict[str, Any], output_dir: Path, has_eval: bool) -> SF
         eval_strategy="steps" if has_eval else "no", eval_steps=hp.get("eval_steps", 50),
         per_device_eval_batch_size=hp.get("batch_size", 1),
         bf16=cfg.get("dtype") in ("bf16", "bfloat16"), use_cpu=cfg.get("device", "auto") == "cpu",
-        gradient_checkpointing=cfg.get("gradient_checkpointing", False), report_to=cfg.get("report_to", ["mlflow"]),
+        gradient_checkpointing=cfg.get("gradient_checkpointing", False), report_to=report_to,
         dataloader_num_workers=0, disable_tqdm=False,
     )
 
