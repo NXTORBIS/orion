@@ -61,3 +61,33 @@ def assert_program(solution: str, asserts: list[str]) -> str:
 def verify_code(solution: str, tests: str | list[str], timeout: float = 10.0) -> CodeVerdict:
     program = assert_program(solution, tests) if isinstance(tests, list) else f"{solution}\n\n{tests}\n"
     return run_python(program, timeout=timeout)
+
+
+@dataclass
+class ExecutionResult:
+    """Result of code execution verification."""
+    ok: bool
+    passed: int = 0
+    total: int = 0
+    error: str = ""
+
+
+def verify_code_execution(solution: str, tests: str | list[str], entry_point: str | None = None,
+                         timeout: float = 10.0) -> ExecutionResult:
+    """Verify code solution against test cases. Entry point is for HumanEval-style tests."""
+    if entry_point:
+        # HumanEval+ format: prompt + completion + test with check(entry_point)
+        program = humaneval_program("", solution, tests, entry_point)
+    else:
+        # MBPP+ format: solution + assert statements
+        program = assert_program(solution, tests) if isinstance(tests, list) else f"{solution}\n\n{tests}\n"
+
+    verdict = run_python(program, timeout=timeout)
+
+    if verdict.timed_out:
+        return ExecutionResult(False, total=1, error="Timeout")
+    elif not verdict.ok:
+        return ExecutionResult(False, total=1, error=verdict.stderr or verdict.stdout)
+    else:
+        # Parse output to count passed tests (simplified)
+        return ExecutionResult(True, passed=1, total=1)

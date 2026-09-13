@@ -1,0 +1,93 @@
+# Multimodal Dataset v1 - Math + Reasoning + Science
+# For ORION-0.2 training target (Phase D)
+
+name: multimodal-v1
+version: multimodal-v1-alpha
+description: "Multi-domain training set combining math, reasoning, and science with balanced weighting"
+
+sources:
+  # Core math: synthetic math training set
+  - task: synth-math
+    path: data/raw/synth_math/train.jsonl
+    count: 2000
+    weight: 0.4
+    purpose: "Reinforce math capabilities from ORION-0.1"
+
+  # Standard math benchmark (when available)
+  # - task: gsm8k-platinum
+  #   path: datasets/gsm8k_platinum/train.jsonl
+  #   count: 1000
+  #   weight: 0.3
+  #   purpose: "Real-world grade-school reasoning"
+
+  # Reasoning: multi-step inference
+  - task: synth-reasoning
+    path: data/raw/synth_reasoning/train.jsonl
+    count: 500
+    weight: 0.15
+    purpose: "Logical inference, constraint satisfaction, fact integration"
+
+  # Science: procedural generation (physics, chemistry, biology)
+  - task: synth-science
+    path: data/raw/synth_science/train.jsonl
+    count: 500
+    weight: 0.15
+    purpose: "Physics, chemistry, biology domain knowledge"
+
+# Total samples: 4000
+# Sampling strategy: stratified by domain + random within domain
+
+# Data quality & contamination checks
+quality_checks:
+  deduplication:
+    enabled: true
+    algorithm: sha256
+    description: "Remove exact duplicates by problem + answer hash"
+
+  pii_removal:
+    enabled: true
+    description: "Remove personally identifiable information (names, emails, etc.)"
+
+  contamination_check:
+    enabled: true
+    test_sets:
+      - synth-math:test.jsonl
+    description: "Ensure no overlap with evaluation sets"
+
+  format_validation:
+    enabled: true
+    required_fields:
+      - id
+      - problem
+      - answer
+    description: "Validate JSONL structure"
+
+  length_bounds:
+    min_problem_chars: 10
+    max_problem_chars: 2000
+    min_answer_chars: 1
+    max_answer_chars: 500
+
+# Sampling configuration
+sampling:
+  shuffle: true
+  seed: 42
+  balance_by_difficulty: true  # Ensure mix of easy/medium/hard
+
+# Output format
+output:
+  format: jsonl
+  fields:
+    - id: "unique identifier (task-domain-seed)"
+    - messages: "[{role: user, content: problem}]"
+    - answer: "gold answer"
+    - family: "problem family/domain"
+    - level: "difficulty level (1=easy, 2=medium, 3=hard)"
+    - source: "which task this came from"
+
+# Version tracking
+changelog:
+  "multimodal-v1-alpha":
+    date: 2026-09-13
+    status: "planning"
+    notes: "Initial multimodal dataset design. Waiting for synth-science generation."

@@ -50,3 +50,28 @@ def validate_tool_call(call: str | dict[str, Any], tools: list[dict[str, Any]], 
 def expected_call_matches(call: dict[str, Any], expected: dict[str, Any]) -> bool:
     """Exact match on name and arguments (used for tool-use evaluation with gold calls)."""
     return call.get("name") == expected.get("name") and call.get("arguments", {}) == expected.get("arguments", {})
+
+
+def verify_api_call(response: str, tools: list[dict[str, Any]] | None = None) -> ToolCallVerdict:
+    """Extract and verify API/tool call from response text. Used in tool-use evaluation."""
+    if not tools:
+        tools = []
+
+    # Try to extract JSON from response (common patterns)
+    patterns = [
+        r'\{[^{}]*"name"[^{}]*"arguments"[^{}]*\}',  # JSON object with name and arguments
+        r'```json\s*(\{[^```]*\})\s*```',  # JSON in code block
+    ]
+
+    for pattern in patterns:
+        import re
+        match = re.search(pattern, response, re.DOTALL)
+        if match:
+            json_str = match.group(1) if match.lastindex else match.group(0)
+            try:
+                call_obj = json.loads(json_str)
+                return validate_tool_call(call_obj, tools)
+            except (json.JSONDecodeError, AttributeError):
+                continue
+
+    return ToolCallVerdict(False, ["Could not extract valid tool call from response"])
