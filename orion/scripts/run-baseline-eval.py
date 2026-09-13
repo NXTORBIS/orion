@@ -21,8 +21,8 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 
 from orion.evals.tasks import TASK_REGISTRY
-from orion.evals.runner import ModelRunner
-from orion.evals.metrics import bootstrap_accuracy, paired_bootstrap_diff
+from orion.evals.runner import HFGenerator, run_task
+from orion.evals.metrics import bootstrap_ci, paired_bootstrap_diff
 from orion.registry.versions import VersionCard
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -41,28 +41,23 @@ class EvalResult:
 
 def load_model(model_name: str, adapter_path: str | None = None):
     """Load model + optional LoRA adapter."""
-    from transformers import AutoTokenizer, AutoModelForCausalLM
     import torch
 
     logger.info(f"Loading model: {model_name}")
 
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        torch_dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32,
-        device_map="auto",
-        load_in_8bit=True if torch.cuda.is_available() else False,
+    dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
+    generator = HFGenerator(
+        model_dir=model_name,
+        adapter_dir=adapter_path,
+        dtype=dtype,
+        batch_size=4,
+        max_new_tokens=256
     )
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    if adapter_path:
-        logger.info(f"Loading LoRA adapter: {adapter_path}")
-        from peft import PeftModel
-        model = PeftModel.from_pretrained(model, adapter_path, is_trainable=False)
-
-    return ModelRunner(model, tokenizer)
+    return generator
 
 
-def run_task_eval(runner, task_name: str, task_path: str, limit: int | None = None, output_dir: Path | None = None):
+def run_task_eval(generator, task_name: str, task_path: str, limit: int | None = None, output_dir: Path | None = None):
     """Run evaluation on a single task."""
     logger.info(f"Evaluating task: {task_name}")
 
@@ -75,66 +70,37 @@ def run_task_eval(runner, task_name: str, task_path: str, limit: int | None = No
         TaskClass = TASK_REGISTRY[task_name]
         task = TaskClass(task_path, limit=limit)
 
-        # Get items
-        items = task.items()
-        logger.info(f"  Loaded {len(items)} items")
-
-        # Run inference
-        results = []
-        correct = 0
-        by_group = {}
-
-        for i, item in enumerate(items):
-            if i % 10 == 0:
-                logger.info(f"  Processing item {i}/{len(items)}")
-
-            # Get response from model
-            response = runner.run(item.messages)
-
-            # Score response
-            score = task.score(item, response)
-
-            results.append({
-                "id": item.id,
-                "group": item.group,
-                "response": response[:500],  # Truncate for storage
-                "ok": score.ok,
-                "extracted": score.extracted,
-                "details": score.details,
-            })
-
-            if score.ok:
-                correct += 1
-
-            # Track by group
-            if item.group not in by_group:
-                by_group[item.group] = {"n": 0, "correct": 0}
-            by_group[item.group]["n"] += 1
-            by_group[item.group]["correct"] += score.ok
-
-        accuracy = correct / len(items) if items else 0
-        logger.info(f"  Accuracy: {accuracy:.1%} ({correct}/{len(items)})")
-
-        # Save results
+        # Run task
         if output_dir:
+            output_dir = Path(output_dir)
             output_dir.mkdir(parents=True, exist_ok=True)
             output_file = output_dir / f"{task_name}.jsonl"
-            with open(output_file, "w") as f:
-                for r in results:
-                    f.write(json.dumps(r) + "\n")
-            logger.info(f"  Saved results to {output_file}")
         else:
-            output_file = None
+            output_file = output_dir / f"{task_name}.jsonl"
 
-        # Compute bootstrap CI
-        ci = bootstrap_accuracy([r["ok"] for r in results])
+        summary = run_task(task, generator, output_file, limit=limit)
+
+        # Extract results
+        accuracy = summary.get("accuracy", 0)
+        total = len(task.items()[:limit]) if limit else len(task.items())
+        correct = int(accuracy * total)
+
+        by_group = {}
+        if "by_group" in summary:
+            for group, stats in summary["by_group"].items():
+                by_group[group] = {
+                    "n": stats.get("n", 0),
+                    "accuracy": stats.get("accuracy", 0)
+                }
+
+        logger.info(f"  Accuracy: {accuracy:.1%} ({correct}/{total})")
 
         return EvalResult(
             task_name=task_name,
-            total=len(items),
+            total=total,
             correct=correct,
             accuracy=accuracy,
-            by_group={g: {"n": s["n"], "accuracy": s["correct"] / s["n"]} for g, s in by_group.items()},
+            by_group=by_group,
             outputs_path=str(output_file) if output_file else "none",
         )
 
@@ -156,11 +122,12 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Load model
-    runner = load_model(args.model_name, args.adapter_path)
+    generator = load_model(args.model_name, args.adapter_path)
 
     # Define tasks (with file paths)
     tasks_to_eval = {
         "synth-math": "data/raw/synth_math/test.jsonl",
+        "synth-science": "data/raw/synth_science/test.jsonl",
         # These require external files; add them as they become available:
         # "gsm8k-platinum": "datasets/gsm8k_platinum/test.jsonl",
         # "math-500": "datasets/math_500/test.jsonl",
@@ -179,7 +146,7 @@ def main():
             logger.info(f"Skipping {task_name}")
             continue
 
-        result = run_task_eval(runner, task_name, task_path, limit=args.limit_per_task, output_dir=output_dir)
+        result = run_task_eval(generator, task_name, task_path, limit=args.limit_per_task, output_dir=output_dir)
         if result:
             results[task_name] = asdict(result)
 
