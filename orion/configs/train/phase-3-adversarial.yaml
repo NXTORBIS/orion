@@ -28,4 +28,4 @@ hyperparameters:
   save_steps: 100
   eval_steps: 100
 
-report_to: [mlflow]
+report_to: []

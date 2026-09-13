@@ -30,3 +30,68 @@ Traceback (most recent call last):
   File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\integrations\integration_utils.py", line 1460, in __del__
     self._auto_end_run
 AttributeError: 'MLflowCallback' object has no attribute '_auto_end_run'
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:  11%|#1        | 36/320 [00:00<00:00, 285.72it/s]Loading weights:  21%|##        | 67/320 [00:00<00:01, 249.38it/s]Loading weights:  29%|##9       | 93/320 [00:00<00:00, 243.95it/s]Loading weights:  37%|###6      | 118/320 [00:00<00:00, 237.90it/s]Loading weights:  45%|####5     | 145/320 [00:00<00:00, 245.64it/s]Loading weights:  53%|#####3    | 170/320 [00:00<00:00, 240.05it/s]Loading weights:  61%|######    | 195/320 [00:00<00:00, 235.60it/s]Loading weights:  68%|######8   | 219/320 [00:00<00:00, 229.80it/s]Loading weights:  76%|#######5  | 242/320 [00:01<00:00, 223.04it/s]Loading weights:  83%|########2 | 265/320 [00:01<00:00, 191.32it/s]Loading weights:  91%|######### | 291/320 [00:01<00:00, 187.75it/s]Loading weights: 100%|##########| 320/320 [00:01<00:00, 227.04it/s]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\ksran\Downloads\AI\orion\src\orion\train\sft.py", line 111, in <module>
+    main(a.config, a.resume_from)
+  File "C:\Users\ksran\Downloads\AI\orion\src\orion\train\sft.py", line 65, in main
+    trainer, tok, ds, output_dir = build_trainer(cfg, root)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ksran\Downloads\AI\orion\src\orion\train\sft.py", line 57, in build_trainer
+    trainer = SFTTrainer(model=model, args=args, train_dataset=ds["train"], eval_dataset=ds.get("validation"),
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\trl\trainer\sft_trainer.py", line 1361, in __init__
+    super().__init__(
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\trl\trainer\base_trainer.py", line 76, in __init__
+    super().__init__(*args, **kwargs)
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\trainer.py", line 579, in __init__
+    self.callback_handler = CallbackHandler(
+                            ^^^^^^^^^^^^^^^^
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\trainer_callback.py", line 435, in __init__
+    self.add_callback(cb)
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\trainer_callback.py", line 452, in add_callback
+    cb = callback() if isinstance(callback, type) else callback
+         ^^^^^^^^^^
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\integrations\integration_utils.py", line 1294, in __init__
+    raise RuntimeError("MLflowCallback requires mlflow to be installed. Run `pip install mlflow`.")
+RuntimeError: MLflowCallback requires mlflow to be installed. Run `pip install mlflow`.
+Exception ignored in: <function MLflowCallback.__del__ at 0x000001F594F0F560>
+Traceback (most recent call last):
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\integrations\integration_utils.py", line 1460, in __del__
+    self._auto_end_run
+AttributeError: 'MLflowCallback' object has no attribute '_auto_end_run'
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:  12%|#2        | 40/320 [00:00<00:00, 352.21it/s]Loading weights:  24%|##3       | 76/320 [00:00<00:00, 286.63it/s]Loading weights:  33%|###3      | 106/320 [00:00<00:00, 273.63it/s]Loading weights:  42%|####1     | 134/320 [00:00<00:00, 241.98it/s]Loading weights:  50%|####9     | 159/320 [00:00<00:00, 225.60it/s]Loading weights:  59%|#####8    | 188/320 [00:00<00:00, 233.82it/s]Loading weights:  66%|######6   | 212/320 [00:00<00:00, 220.49it/s]Loading weights:  73%|#######3  | 235/320 [00:00<00:00, 214.51it/s]Loading weights:  80%|########  | 257/320 [00:01<00:00, 213.00it/s]Loading weights:  87%|########7 | 279/320 [00:01<00:00, 210.79it/s]Loading weights:  94%|#########4| 302/320 [00:01<00:00, 209.09it/s]Loading weights: 100%|##########| 320/320 [00:01<00:00, 230.86it/s]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\ksran\Downloads\AI\orion\src\orion\train\sft.py", line 111, in <module>
+    main(a.config, a.resume_from)
+  File "C:\Users\ksran\Downloads\AI\orion\src\orion\train\sft.py", line 65, in main
+    trainer, tok, ds, output_dir = build_trainer(cfg, root)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ksran\Downloads\AI\orion\src\orion\train\sft.py", line 57, in build_trainer
+    trainer = SFTTrainer(model=model, args=args, train_dataset=ds["train"], eval_dataset=ds.get("validation"),
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\trl\trainer\sft_trainer.py", line 1361, in __init__
+    super().__init__(
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\trl\trainer\base_trainer.py", line 76, in __init__
+    super().__init__(*args, **kwargs)
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\trainer.py", line 579, in __init__
+    self.callback_handler = CallbackHandler(
+                            ^^^^^^^^^^^^^^^^
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\trainer_callback.py", line 435, in __init__
+    self.add_callback(cb)
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\trainer_callback.py", line 452, in add_callback
+    cb = callback() if isinstance(callback, type) else callback
+         ^^^^^^^^^^
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\integrations\integration_utils.py", line 1294, in __init__
+    raise RuntimeError("MLflowCallback requires mlflow to be installed. Run `pip install mlflow`.")
+RuntimeError: MLflowCallback requires mlflow to be installed. Run `pip install mlflow`.
+Exception ignored in: <function MLflowCallback.__del__ at 0x000001F08C9DDDA0>
+Traceback (most recent call last):
+  File "C:\Users\ksran\AppData\Local\Programs\Python\Python312\Lib\site-packages\transformers\integrations\integration_utils.py", line 1460, in __del__
+    self._auto_end_run
+AttributeError: 'MLflowCallback' object has no attribute '_auto_end_run'
+Loading weights:   0%|          | 0/320 [00:00<?, ?it/s]Loading weights:   6%|5         | 18/320 [00:00<00:01, 167.82it/s]Loading weights:  11%|#1        | 36/320 [00:00<00:01, 169.23it/s]
