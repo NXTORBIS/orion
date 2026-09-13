@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "C:\Users\ksran\Downloads\AI\orion\src\orion\train\sft.py", line 19, in <module>
+    from trl import SFTConfig, SFTTrainer
+ModuleNotFoundError: No module named 'trl'
+
+    ================================================================
+    OMNISCIENT ORION - MULTI-DOMAIN CONTINUOUS IMPROVEMENT LOOP
+    All Knowledge: Math, Science, Coding, Reasoning, Knowledge
+    Cycle: Train (4-8h) > Comprehensive Eval (30m) > Promote > Repeat
+    ================================================================
+    
+
+######################################################################
+# OMNISCIENT ITERATION 1 - 2026-09-13T21:24:18.457885
+# Current Model: ORION-0.1 (Best: ORION-0.1 @ 55.0%)
+######################################################################
+
+[STEP 1/3] OMNISCIENT TRAINING (500 steps, ~4-8 hours)
+
+======================================================================
+[21:24:18] Training ORION-0.2 on ALL 7 domains (18,700 examples)
+======================================================================
+Training failed!

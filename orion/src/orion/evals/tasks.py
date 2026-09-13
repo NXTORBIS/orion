@@ -410,6 +410,32 @@ class KnowledgeTask(SynthMathTask):
         return Score(ok, response[:100], {"expected": gold})
 
 
+# Instruction Task
+
+class InstructionTask(SynthMathTask):
+    """ORION instruction-following problems (format, constraints, tone, multi-turn)."""
+
+    name = "synth-instruction"
+    standard_benchmark = False
+
+    def items(self) -> list[EvalItem]:
+        return [EvalItem(
+            id=r["id"],
+            messages=[{"role": "user", "content": r['problem']}],
+            gold=r["answer"],
+            group=r["family"],
+            level=r.get("level"),
+            meta={"instruction_type": r.get("instruction_type")}
+        ) for r in self.rows]
+
+    def score(self, item: EvalItem, response: str) -> Score:
+        gold = item.gold.lower().strip()
+        resp = response.lower().strip()
+        # Instruction following: check if key elements are present
+        ok = len(resp) > 10 and (gold[:30].lower() in resp or resp[:30].lower() in gold)
+        return Score(ok, response[:100], {"expected": gold})
+
+
 # Task Registry
 
 TASK_REGISTRY = {
@@ -420,6 +446,7 @@ TASK_REGISTRY = {
     "synth-coding": CodingTask,
     "synth-reasoning": ReasoningTask,
     "synth-knowledge": KnowledgeTask,
+    "synth-instruction": InstructionTask,
     "gsm8k-platinum": GSM8KPlatinumTask,
     "math-500": MathTask,
     "mmlu-pro": MMluProTask,

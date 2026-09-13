@@ -22,11 +22,11 @@ def run_cmd(cmd: list, desc: str) -> bool:
 def omniscient_loop():
     """Continuous multi-domain training with comprehensive evaluation"""
     print("""
-    ╔════════════════════════════════════════════════════════════════════╗
-    ║  OMNISCIENT ORION - MULTI-DOMAIN CONTINUOUS IMPROVEMENT LOOP       ║
-    ║  All Knowledge: Math, Science, Coding, Reasoning, Knowledge        ║
-    ║  Cycle: Train (4-8h) → Comprehensive Eval (30m) → Promote → Repeat ║
-    ╚════════════════════════════════════════════════════════════════════╝
+    ================================================================
+    OMNISCIENT ORION - MULTI-DOMAIN CONTINUOUS IMPROVEMENT LOOP
+    All Knowledge: Math, Science, Coding, Reasoning, Knowledge
+    Cycle: Train (4-8h) > Comprehensive Eval (30m) > Promote > Repeat
+    ================================================================
     """)
 
     iteration = 0
