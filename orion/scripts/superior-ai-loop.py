@@ -7,6 +7,7 @@ Running: Continuous cycles, no stopping until superior to ChatGPT
 """
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -53,12 +54,12 @@ SUPERIOR_TARGETS = {
     },
 }
 
-def run_cmd(cmd: list, desc: str) -> bool:
+def run_cmd(cmd: list, desc: str, env=None) -> bool:
     """Run command and return success"""
     print(f"\n{'='*70}")
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {desc}")
     print('='*70)
-    result = subprocess.run(cmd, capture_output=False)
+    result = subprocess.run(cmd, capture_output=False, env=env)
     return result.returncode == 0
 
 def superior_ai_loop():
@@ -139,9 +140,15 @@ def superior_ai_loop():
         print(f"  • Knowledge, Instruction, Sequences, Systems")
         print(f"  • Creative, Safety, Meta-Reasoning, Speed")
 
+        # Set environment to disable MLflow integration issues
+        env = os.environ.copy()
+        env["HF_MLFLOW_ENABLED"] = "0"
+        env["MLFLOW_TRACKING_URI"] = "none"
+
         if not run_cmd(
             [sys.executable, "-m", "orion.train.sft", config_map[phase]],
-            f"Training {next_version} with {method} (Phase {phase})"
+            f"Training {next_version} with {method} (Phase {phase})",
+            env=env
         ):
             print("Training encountered issues, will retry next cycle...")
             not_promoted_count += 1
@@ -159,7 +166,8 @@ def superior_ai_loop():
             [sys.executable, "scripts/omniscient-eval.py",
              "Qwen/Qwen3.5-0.8B-Base",
              f"checkpoints/{next_version.lower()}-superior/final"],
-            f"Superior AI evaluation of {next_version}"
+            f"Superior AI evaluation of {next_version}",
+            env=env
         )
 
         # Step 3: Domain comparison vs ChatGPT
