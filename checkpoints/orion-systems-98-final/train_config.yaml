@@ -1,0 +1,33 @@
+device: cpu
+dtype: fp32
+eval_file: data/processed/chatgpt_level_combined/sft_validation.jsonl
+experiment: systems-98-percent-push
+gradient_checkpointing: true
+hyperparameters:
+  adversarial_examples_ratio: 0.95
+  batch_size: 512
+  epochs: 50
+  eval_steps: 200
+  grad_accum: 1
+  learning_rate: 0.025
+  logging_steps: 100
+  lr_scheduler: constant_with_warmup
+  max_grad_norm: 0.5
+  max_length: 1024
+  max_steps: 10000
+  save_steps: 500
+  temperature: 0.02
+  warmup_steps: 500
+  weight_decay: 0.001
+lora:
+  alpha: 512
+  dropout: 0.01
+  r: 256
+  target_modules: all-linear
+model: models/Qwen3.5-0.8B-Base
+multi_pass_cycles: 5
+output_dir: checkpoints/orion-systems-98-final
+report_to: []
+run_name: orion-systems-domain-98-final
+seed: 42
+train_file: data/processed/chatgpt_level_combined/sft_train.jsonl
