@@ -309,11 +309,117 @@ class IFEvalTask:
         return Score(ok, response[:100], {"violations": violations})
 
 
+# Sequences Task
+
+class SequencesTask(SynthMathTask):
+    """ORION procedural sequence problems (arithmetic, geometric, Fibonacci, polynomial)."""
+
+    name = "synth-sequences"
+    standard_benchmark = False
+
+    def score(self, item: EvalItem, response: str) -> Score:
+        v = verify_math(response, item.gold)
+        return Score(v.ok, v.extracted, {"extraction": v.extraction, "comparison": v.comparison})
+
+
+# Systems Task
+
+class SystemsTask(SynthMathTask):
+    """ORION procedural systems of equations (2x2, 3x3)."""
+
+    name = "synth-systems"
+    standard_benchmark = False
+
+    def score(self, item: EvalItem, response: str) -> Score:
+        v = verify_math(response, item.gold)
+        return Score(v.ok, v.extracted, {"extraction": v.extraction, "comparison": v.comparison})
+
+
+# Coding Task
+
+class CodingTask(SynthMathTask):
+    """ORION procedural coding problems (algorithms, debugging, design)."""
+
+    name = "synth-coding"
+    standard_benchmark = False
+
+    def items(self) -> list[EvalItem]:
+        return [EvalItem(
+            id=r["id"],
+            messages=[{"role": "user", "content": f"{r['problem']}\nAnswer:"}],
+            gold=r["answer"],
+            group=r["family"],
+            level=r.get("level"),
+            meta={"category": r.get("category")}
+        ) for r in self.rows]
+
+    def score(self, item: EvalItem, response: str) -> Score:
+        gold = item.gold.lower().strip()
+        resp = response.lower().strip()
+        ok = gold in resp or resp in gold or resp.startswith(gold[:20])
+        return Score(ok, response[:100], {"expected": gold})
+
+
+# Reasoning Task
+
+class ReasoningTask(SynthMathTask):
+    """ORION reasoning problems (logic, analogies, common sense, causality)."""
+
+    name = "synth-reasoning"
+    standard_benchmark = False
+
+    def items(self) -> list[EvalItem]:
+        return [EvalItem(
+            id=r["id"],
+            messages=[{"role": "user", "content": f"{r['problem']}\nAnswer:"}],
+            gold=r["answer"],
+            group=r["family"],
+            level=r.get("level"),
+            meta={"reasoning_type": r.get("reasoning_type")}
+        ) for r in self.rows]
+
+    def score(self, item: EvalItem, response: str) -> Score:
+        gold = item.gold.lower().strip()
+        resp = response.lower().strip()
+        ok = gold in resp or resp in gold or (len(gold) > 5 and gold[:5] in resp)
+        return Score(ok, response[:100], {"expected": gold})
+
+
+# Knowledge Task
+
+class KnowledgeTask(SynthMathTask):
+    """ORION knowledge problems (history, geography, culture, science facts)."""
+
+    name = "synth-knowledge"
+    standard_benchmark = False
+
+    def items(self) -> list[EvalItem]:
+        return [EvalItem(
+            id=r["id"],
+            messages=[{"role": "user", "content": f"{r['problem']}\nAnswer:"}],
+            gold=r["answer"],
+            group=r["family"],
+            level=r.get("level"),
+            meta={"domain": r.get("domain")}
+        ) for r in self.rows]
+
+    def score(self, item: EvalItem, response: str) -> Score:
+        gold = item.gold.lower().strip()
+        resp = response.lower().strip()
+        ok = gold in resp or resp in gold or (len(gold) > 3 and gold.split()[0] in resp)
+        return Score(ok, response[:100], {"expected": gold})
+
+
 # Task Registry
 
 TASK_REGISTRY = {
     "synth-math": SynthMathTask,
     "synth-science": ScienceTask,
+    "synth-sequences": SequencesTask,
+    "synth-systems": SystemsTask,
+    "synth-coding": CodingTask,
+    "synth-reasoning": ReasoningTask,
+    "synth-knowledge": KnowledgeTask,
     "gsm8k-platinum": GSM8KPlatinumTask,
     "math-500": MathTask,
     "mmlu-pro": MMluProTask,

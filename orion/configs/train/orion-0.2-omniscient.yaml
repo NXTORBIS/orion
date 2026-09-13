@@ -1,0 +1,65 @@
+# ORION-0.2 Omniscient Training Configuration
+# Multi-domain comprehensive training across ALL knowledge
+# Targets: Math, Science, Reasoning, Coding, Knowledge, Sequences, Systems
+
+model_name_or_path: Qwen/Qwen3.5-0.8B-Base
+adapter_name_or_path: checkpoints/orion-0.1-synthmath-lora/final
+
+output_dir: checkpoints/orion-0.2-omniscient
+
+training_args:
+  num_train_epochs: 2
+  max_steps: 500
+  learning_rate: 0.0001
+  lr_scheduler_type: cosine
+  warmup_steps: 50
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 2
+
+  logging_steps: 20
+  save_steps: 50
+  eval_steps: 50
+  save_total_limit: 2
+
+  fp16: false
+  dataloader_num_workers: 4
+  dataloader_prefetch_factor: 2
+  seed: 42
+  report_to: ["mlflow"]
+  logging_dir: mlruns/
+
+lora_config:
+  r: 16
+  lora_alpha: 32
+  target_modules: ["q_proj", "v_proj"]
+  lora_dropout: 0.1
+  bias: "none"
+  task_type: CAUSAL_LM
+
+sft_config:
+  max_seq_length: 512
+  packing: false
+
+# Training data composition: 14,000+ examples across all domains
+# Each dataset carefully weighted for balanced omniscience
+training_data:
+  # Foundation: Math (2,000 examples)
+  synth-math: 2000
+
+  # Science: Physics, Chemistry, Biology (10,500 examples)
+  synth-science: 10500
+
+  # Sequences: Pattern recognition (800 examples)
+  synth-sequences: 800
+
+  # Systems: Equation solving (600 examples)
+  synth-systems: 600
+
+  # Coding: Algorithms, debugging (800 examples)
+  synth-coding: 800
+
+  # Reasoning: Logic, common sense (1,000 examples)
+  synth-reasoning: 1000
+
+  # Knowledge: History, geography, culture (1,000 examples)
+  synth-knowledge: 1000
